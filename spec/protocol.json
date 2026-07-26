@@ -1,0 +1,747 @@
+{
+  "_note": "Interface specification derived from the BSGO client for interoperability. Message ids and names only; no code.",
+  "protocol_ids": {
+    "Login": 0,
+    "Universe": 1,
+    "Game": 2,
+    "Sync": 3,
+    "Player": 4,
+    "Debug": 5,
+    "Catalogue": 6,
+    "Ranking": 7,
+    "Story": 8,
+    "Scene": 9,
+    "Room": 10,
+    "Community": 11,
+    "Shop": 12,
+    "Setting": 13,
+    "Ship": 14,
+    "Dialog": 15,
+    "Market": 16,
+    "Notification": 17,
+    "Subscribe": 18,
+    "Feedback": 19,
+    "Tournament": 20,
+    "Arena": 21,
+    "Battlespace": 22,
+    "Wof": 23,
+    "Zone": 24
+  },
+  "protocols": {
+    "Arena": {
+      "id": 21,
+      "source": "ArenaProtocol.cs",
+      "requests": {
+        "Arena1vs1CheckIn": 1,
+        "Arena3vs3MixedCheckIn": 2,
+        "Arena3vs3MixedRandomCheckIn": 3,
+        "ArenaDuelCheckIn": 4,
+        "ArenaCancelCheckIn": 5,
+        "ArenaInviteOk": 6,
+        "ArenaInviteCancel": 7,
+        "ArenaClose": 8
+      },
+      "replies": {
+        "Arena1vs1CheckedIn": 1,
+        "Arena3vs3MixedCheckedIn": 2,
+        "Arena3vs3MixedRandomCheckedIn": 3,
+        "ArenaDuelCheckedIn": 4,
+        "ArenaDuelInviteSlave": 5,
+        "ArenaPartyFound": 6,
+        "ArenaInvite": 7,
+        "ArenaBackToQueue": 8,
+        "ArenaFailed": 9,
+        "ArenaClosed": 10,
+        "ArenaWon": 11,
+        "ArenaLost": 12,
+        "ArenaInit": 13,
+        "ArenaOutOfRange": 14,
+        "ArenaOuterRangeOk": 15,
+        "ArenaCapturePoint": 16,
+        "ArenaOutOfCapturePoint": 17,
+        "ArenaRespawn": 18
+      },
+      "other_enums": {}
+    },
+    "Catalogue": {
+      "id": 6,
+      "source": "CatalogueProtocol.cs",
+      "requests": {
+        "Card": 1
+      },
+      "replies": {
+        "Card": 2
+      },
+      "other_enums": {}
+    },
+    "Community": {
+      "id": 11,
+      "source": "CommunityProtocol.cs",
+      "requests": {
+        "PartyInvitePlayer": 1,
+        "PartyDismissPlayer": 2,
+        "PartyLeave": 3,
+        "PartyAppointLeader": 4,
+        "PartyAccept": 5,
+        "FriendInvite": 6,
+        "FriendAccept": 7,
+        "FriendRemove": 8,
+        "IgnoreAdd": 9,
+        "IgnoreRemove": 10,
+        "ChatConnected": 11,
+        "ChatFleetAllowed": 12,
+        "ChatAuthFailed": 13,
+        "GuildStart": 14,
+        "GuildLeave": 15,
+        "GuildChangeRankName": 16,
+        "GuildChangeRankPermissions": 17,
+        "GuildPromote": 18,
+        "GuildKick": 19,
+        "GuildInvite": 21,
+        "GuildAccept": 22,
+        "RecruitInvited": 24,
+        "PartyChatInvite": 32,
+        "RecruitLevel": 33,
+        "PartyMemberFtlState": 34,
+        "IgnoreClear": 35
+      },
+      "replies": {
+        "Party": 1,
+        "PartyIgnore": 2,
+        "PartyInvite": 3,
+        "FriendInvite": 4,
+        "FriendAccept": 5,
+        "FriendRemove": 6,
+        "FriendAdd": 7,
+        "IgnoreAdd": 8,
+        "IgnoreRemove": 9,
+        "ChatSessionId": 10,
+        "ChatFleetAllowed": 11,
+        "GuildQuit": 12,
+        "GuildRemove": 13,
+        "GuildInvite": 14,
+        "GuildInfo": 15,
+        "GuildSetPromotion": 16,
+        "GuildMemberUpdate": 17,
+        "GuildSetChangeRankName": 18,
+        "GuildSetChangePermissions": 19,
+        "GuildStartError": 21,
+        "GuildJoinError": 22,
+        "GuildInviteResult": 23,
+        "GuildOperationResult": 24,
+        "Recruits": 26,
+        "ActivateJumpTargetTransponder": 37,
+        "CancelJumpTargetTransponder": 38,
+        "PartyAnchor": 39,
+        "PartyChatInviteFailed": 40,
+        "RecruitLevel": 41,
+        "PartyMemberFtlState": 42
+      },
+      "other_enums": {
+        "GuildJoinErrorReason": {
+          "GuildNotFound": 1,
+          "AlreadyJoined": 2,
+          "WrongFaction": 3
+        }
+      }
+    },
+    "Debug": {
+      "id": 5,
+      "source": "DebugProtocol.cs",
+      "requests": {
+        "Command": 1,
+        "Activity": 12,
+        "ProcessState": 14,
+        "UpgradeSystem": 17
+      },
+      "replies": {
+        "Command": 2,
+        "Message": 3,
+        "Counters": 9,
+        "ProcessState": 15,
+        "UpdateRoles": 16
+      },
+      "other_enums": {}
+    },
+    "Dialog": {
+      "id": 15,
+      "source": "DialogProtocol.cs",
+      "requests": {
+        "Say": 0,
+        "Advance": 1,
+        "Stop": 2
+      },
+      "replies": {
+        "NpcRemark": 0,
+        "PcRemarks": 1,
+        "Stopped": 2,
+        "Action": 3
+      },
+      "other_enums": {}
+    },
+    "Feedback": {
+      "id": 19,
+      "source": "FeedbackProtocol.cs",
+      "requests": {},
+      "replies": {},
+      "other_enums": {
+        "MessageId": {
+          "UiElementShown": 0,
+          "UiElementHidden": 1
+        },
+        "UiElementId": {
+          "ShopWindow": 0,
+          "RepairWindow": 1,
+          "ShipShop": 2,
+          "ShipCustomizationWindow": 3,
+          "HangarWindow": 4,
+          "ChangeAmmoMenu": 5,
+          "InflightShop": 6
+        }
+      }
+    },
+    "Game": {
+      "id": 2,
+      "source": "GameProtocol.cs",
+      "requests": {
+        "WhoIs": 3,
+        "SubscribeInfo": 10,
+        "UnSubscribeInfo": 11,
+        "MoveToDirection": 12,
+        "MoveToDirectionWithoutRoll": 13,
+        "CastSlotAbility": 21,
+        "CastImmutableSlotAbility": 22,
+        "LockTarget": 25,
+        "WASD": 29,
+        "QWEASD": 30,
+        "Mining": 35,
+        "Loot": 41,
+        "TakeLootItems": 43,
+        "Dock": 45,
+        "Jump": 46,
+        "AnsStartQueue": 48,
+        "AnsJump": 50,
+        "Follow": 52,
+        "Quit": 54,
+        "SetSpeed": 56,
+        "SetGear": 57,
+        "JumpIn": 61,
+        "MoveInfo": 63,
+        "StopJump": 65,
+        "SelectRespawnLocation": 70,
+        "GroupJump": 72,
+        "StopGroupJump": 73,
+        "RequestJumpToTarget": 75,
+        "CompleteJump": 76,
+        "RequestUnanchor": 77,
+        "RequestAnchor": 78,
+        "RequestLaunchStrikes": 79,
+        "CancelMiningRequest": 82,
+        "RequestJumpToBeacon": 85,
+        "ToggleAbilityOn": 86,
+        "ToggleAbilityOff": 87,
+        "UpdateAbilityTargets": 88,
+        "GroupJumpToBeacon": 89,
+        "TurnToDirectionStrikes": 100,
+        "TurnByPitchYawStrikes": 101,
+        "CancelDocking": 102,
+        "GroupJumpToTarget": 103,
+        "CargoInteraction": 106
+      },
+      "replies": {
+        "Info": 2,
+        "WhoIs": 4,
+        "Move": 6,
+        "ObjectLeft": 7,
+        "WeaponShot": 13,
+        "MissileDecoyed": 18,
+        "SyncMove": 20,
+        "Cast": 22,
+        "StopSlotAbility": 24,
+        "Scan": 34,
+        "CombatInfo": 40,
+        "AskStartQueue": 47,
+        "AskJump": 49,
+        "Collide": 55,
+        "FTLCharge": 58,
+        "VirusBlocked": 59,
+        "RemoveMe": 69,
+        "TimeOrigin": 70,
+        "StopGroupJump": 76,
+        "LeaderStopGroupJump": 77,
+        "NotEnoughTylium": 81,
+        "UpdateRoles": 83,
+        "PaintTheTarget": 84,
+        "UnpaintTheTarget": 85,
+        "StopJump": 86,
+        "ChangeVisibility": 87,
+        "UpdateFactionGroup": 88,
+        "MineField": 90,
+        "ObjectState": 91,
+        "FlareReleased": 92,
+        "LostAbilityTarget": 93,
+        "LostJumpTransponder": 94,
+        "DockingDelay": 95,
+        "ChangedPlayerSpeed": 96,
+        "ShortCircuitResult": 97,
+        "OutpostStateBroadcast": 98,
+        "RespawnOptions": 99,
+        "AnchorDeclined": 100,
+        "DetachedToSpace": 104,
+        "RetachedToSpace": 105,
+        "CargoInteraction": 106
+      },
+      "other_enums": {}
+    },
+    "Login": {
+      "id": 0,
+      "source": "LoginProtocol.cs",
+      "requests": {
+        "Init": 1,
+        "Player": 2,
+        "Echo": 5
+      },
+      "replies": {
+        "Hello": 0,
+        "Init": 1,
+        "Error": 2,
+        "Player": 3,
+        "Wait": 4,
+        "Echo": 5
+      },
+      "other_enums": {}
+    },
+    "Notification": {
+      "id": 17,
+      "source": "NotificationProtocol.cs",
+      "requests": {},
+      "replies": {
+        "Message": 1,
+        "MiningShipUnderAttack": 2,
+        "OutpostAttacked": 5,
+        "HeavyFight": 6,
+        "Experience": 7,
+        "DutyUpdated": 8,
+        "OreMined": 9,
+        "Reward": 10,
+        "MissionCompleted": 11,
+        "DailyLoginBonus": 12,
+        "SystemUpgradeResult": 13,
+        "EmergencyMessage": 14,
+        "AugmentItem": 15,
+        "DeathPaymentBonus": 16,
+        "JumpBeaconAttacked": 19,
+        "MonthlyShipSale": 20,
+        "SectorEventReward": 21,
+        "SectorEventState": 22,
+        "SectorEventTasks": 23,
+        "FtlMissionsOff": 24,
+        "ErrorMessage": 25,
+        "SectorFortificationLevel": 26,
+        "LootMessage": 27,
+        "InboxMailLimit": 28,
+        "JumpNotification": 29,
+        "ConversionCampaignOffer": 30
+      },
+      "other_enums": {}
+    },
+    "Player": {
+      "id": 4,
+      "source": "PlayerProtocol.cs",
+      "requests": {
+        "MoveItem": 1,
+        "BuySkill": 2,
+        "SelectTitle": 3,
+        "BindSticker": 4,
+        "SelectConsumable": 5,
+        "UnbindSticker": 6,
+        "AddShip": 7,
+        "RemoveShip": 8,
+        "SelectShip": 9,
+        "UpgradeShip": 10,
+        "RepairSystem": 11,
+        "RepairShip": 12,
+        "ScrapShip": 13,
+        "CreateAvatar": 14,
+        "SelectFaction": 15,
+        "UpgradeSystem": 16,
+        "SetShipName": 17,
+        "UseAugment": 18,
+        "OldChangeFaction": 19,
+        "ChooseDailyBonus": 20,
+        "UpgradeSystemByPack": 21,
+        "MoveAll": 22,
+        "ReadMail": 23,
+        "RemoveMail": 24,
+        "MailAction": 25,
+        "RepairAll": 26,
+        "CheckUserBonus": 27,
+        "CheckNameAvailability": 28,
+        "PopupSeen": 30,
+        "ChooseName": 32,
+        "CreateAvatarFactionChange": 33,
+        "OldChangeName": 34,
+        "InstantSkillBuy": 35,
+        "ReduceSkillLearnTime": 36,
+        "SubmitMission": 37,
+        "AugmentMassActivation": 38,
+        "SendDradisData": 39,
+        "RequestCharacterServices": 40,
+        "ChangeFaction": 41,
+        "ChangeName": 42,
+        "ChangeAvatar": 43,
+        "ResourceHardcap": 44,
+        "DeselectTitle": 45
+      },
+      "replies": {
+        "Reset": 1,
+        "PlayerInfo": 2,
+        "Skills": 3,
+        "Missions": 4,
+        "RemoveMissions": 5,
+        "Duties": 6,
+        "HoldItems": 7,
+        "RemoveHoldItems": 8,
+        "LockerItems": 9,
+        "RemoveLockerItems": 10,
+        "ShipInfo": 11,
+        "Slots": 12,
+        "Stickers": 13,
+        "RemoveStickers": 14,
+        "AddShip": 15,
+        "RemoveShip": 16,
+        "ActiveShip": 17,
+        "ShipName": 19,
+        "NameAvailable": 20,
+        "NameNotAvailable": 21,
+        "ID": 22,
+        "Name": 23,
+        "Faction": 24,
+        "Experience": 25,
+        "SpentExperience": 26,
+        "Level": 27,
+        "NormalExperience": 28,
+        "Avatar": 29,
+        "Loot": 30,
+        "RemoveLootItems": 31,
+        "Stats": 32,
+        "AbilityValidation": 33,
+        "PaymentInfo": 34,
+        "Counters": 35,
+        "Title": 36,
+        "ResetDuties": 37,
+        "AllowFactionSwitch": 38,
+        "Factors": 39,
+        "RemoveFactors": 40,
+        "Mail": 41,
+        "RemoveMail": 42,
+        "Capability": 43,
+        "AnswerUserBonus": 44,
+        "FactorModify": 45,
+        "UpdatePopupSeenList": 50,
+        "CannotStackBoosters": 51,
+        "Anchor": 52,
+        "Unanchor": 53,
+        "CarrierDradis": 54,
+        "HoldOverflow": 55,
+        "SettingsInfo": 56,
+        "DotArea": 57,
+        "SlotStats": 58,
+        "ActivateOnByDefaultSlots": 59,
+        "WaterExchangeValues": 60,
+        "BonusMapParts": 61,
+        "Statistics": 62,
+        "CharacterServices": 63,
+        "FactionChangeSuccess": 64,
+        "NameChangeSuccess": 65,
+        "AvatarChangeSuccess": 66,
+        "CharacterServiceError": 67,
+        "ResourceHardcap": 68
+      },
+      "other_enums": {
+        "DamageOverTimeEffect": {
+          "SectorBorder": 0,
+          "MineField": 1,
+          "SpeedDebuff": 2,
+          "PowerDrain": 3,
+          "DradisRange": 4
+        }
+      }
+    },
+    "Ranking": {
+      "id": 7,
+      "source": "RankingProtocol.cs",
+      "requests": {
+        "RequestRankingTab": 3,
+        "RequestPlayerRank": 5,
+        "RequestRankingCounter": 7,
+        "RequestRankingCounterPlayer": 9,
+        "RequestRankingTournament": 11,
+        "RequestRankingTournamentPlayer": 13
+      },
+      "replies": {
+        "ReplyRankingTab": 4,
+        "ReplyPlayerRank": 6,
+        "ReplyRankingCounter": 8,
+        "ReplyRankingCounterPlayer": 10,
+        "ReplyRankingTournament": 12,
+        "ReplyRankingTournamentPlayer": 14
+      },
+      "other_enums": {}
+    },
+    "Room": {
+      "id": 10,
+      "source": "RoomProtocol.cs",
+      "requests": {
+        "Talk": 0,
+        "NpcMarks": 2,
+        "EnterDoor": 4,
+        "Quit": 5,
+        "Enter": 6
+      },
+      "replies": {
+        "Talk": 1,
+        "NpcMarks": 3
+      },
+      "other_enums": {}
+    },
+    "Scene": {
+      "id": 9,
+      "source": "SceneProtocol.cs",
+      "requests": {
+        "SceneLoaded": 1,
+        "Disconnect": 2,
+        "StopDisconnect": 3,
+        "QuitLogin": 4
+      },
+      "replies": {
+        "LoadNextScene": 1,
+        "DisconnectTimer": 2,
+        "Disconnect": 100
+      },
+      "other_enums": {}
+    },
+    "Setting": {
+      "id": 13,
+      "source": "SettingProtocol.cs",
+      "requests": {
+        "SaveSettings": 1,
+        "SaveKeys": 2,
+        "SetSyfyShip": 5,
+        "SetFullScreen": 6
+      },
+      "replies": {
+        "Settings": 3,
+        "Keys": 4
+      },
+      "other_enums": {}
+    },
+    "Shop": {
+      "id": 12,
+      "source": "ShopProtocol.cs",
+      "requests": {
+        "Items": 1,
+        "Close": 11,
+        "BoughtShipSaleOffer": 13,
+        "EventShopItems": 15,
+        "AllSales": 17
+      },
+      "replies": {
+        "Items": 2,
+        "Sales": 3,
+        "UpgradeSales": 4,
+        "ShopPrices": 8,
+        "BoughtShipSaleOffer": 12,
+        "EventShopItems": 14,
+        "EventShopAvailable": 16
+      },
+      "other_enums": {}
+    },
+    "Story": {
+      "id": 8,
+      "source": "StoryProtocol.cs",
+      "requests": {
+        "TriggerControl": 1,
+        "MessageBoxOk": 2,
+        "Skip": 3,
+        "Abandon": 4,
+        "Continue": 5,
+        "Decline": 6,
+        "CutsceneFinished": 7,
+        "LookingAtTrigger": 8
+      },
+      "replies": {
+        "BannerBox": 1,
+        "MessageBox": 2,
+        "HelpBox": 3,
+        "Mark": 4,
+        "MissionLog": 5,
+        "SelectTarget": 6,
+        "HighlightControl": 7,
+        "Progress": 8,
+        "HighlightObject": 9,
+        "CloseMessageBoxes": 10,
+        "CloseMissionLog": 11,
+        "PlayCutscene": 12,
+        "SimplifyTutorialUi": 13,
+        "AddSkipButton": 14,
+        "EnableTargetting": 15,
+        "StartLookAtTriggerClientCheck": 16,
+        "EnableMissileTutorial": 17,
+        "ShowOnScreenNotification": 18,
+        "EnableGear": 19,
+        "AskContinue": 20
+      },
+      "other_enums": {
+        "ControlType": {
+          "TargetEnemy": 19,
+          "TargetAlly": 20,
+          "ThrottleBar": 21,
+          "Boosters": 22,
+          "Camera": 23,
+          "SystemMap": 24,
+          "MatchSpeed": 25,
+          "Follow": 26,
+          "Turn": 27,
+          "Strafe": 28,
+          "Roll": 29,
+          "Tournament": 51,
+          "Weapon1": 101,
+          "Weapon2": 102,
+          "Weapon3": 103,
+          "Weapon4": 104,
+          "Weapon5": 105,
+          "Weapon6": 106,
+          "Weapon7": 107,
+          "Weapon8": 108,
+          "Weapon9": 109,
+          "Weapon10": 110,
+          "Weapon11": 111,
+          "Weapon12": 112,
+          "WEAPON_MAX": 113,
+          "Ability1": 114,
+          "Ability2": 115,
+          "Ability3": 116,
+          "Ability4": 117,
+          "Ability5": 118,
+          "Ability6": 119,
+          "Ability7": 120,
+          "Ability8": 121,
+          "Ability9": 122,
+          "Ability10": 123,
+          "ABILITY_MAX": 126,
+          "HpGuiSlot": 130
+        }
+      }
+    },
+    "Subscribe": {
+      "id": 18,
+      "source": "SubscribeProtocol.cs",
+      "requests": {
+        "Info": 1,
+        "Subscribe": 2,
+        "Unsubscribe": 3,
+        "SubscribeStats": 4,
+        "UnsubscribeStats": 5
+      },
+      "replies": {
+        "PlayerName": 1,
+        "PlayerFaction": 2,
+        "PlayerAvatar": 3,
+        "PlayerShips": 4,
+        "PlayerStatus": 5,
+        "PlayerLocation": 6,
+        "PlayerLevel": 7,
+        "PlayerGuild": 8,
+        "PlayerStats": 9,
+        "PlayerTitle": 10,
+        "PlayerMedal": 11,
+        "PlayerLogout": 12,
+        "PlayerTournamentIndicator": 13
+      },
+      "other_enums": {}
+    },
+    "Sync": {
+      "id": 3,
+      "source": "SyncProtocol.cs",
+      "requests": {
+        "SyncRequest": 0
+      },
+      "replies": {
+        "SyncReply": 1
+      },
+      "other_enums": {}
+    },
+    "Universe": {
+      "id": 1,
+      "source": "UniverseProtocol.cs",
+      "requests": {
+        "SubscribeGalaxyMap": 5,
+        "UnsubscribeGalaxyMap": 6
+      },
+      "replies": {
+        "Update": 7
+      },
+      "other_enums": {}
+    },
+    "Wof": {
+      "id": 23,
+      "source": "WofProtocol.cs",
+      "requests": {
+        "RequestInit": 1,
+        "RequestDraw": 3,
+        "RequestVisibleMaps": 5,
+        "RequestMapStart": 7,
+        "RequestMapInfo": 8
+      },
+      "replies": {
+        "ReplyInit": 2,
+        "ReplyDraw": 4,
+        "ReplyVisibleMaps": 6,
+        "ReplyMapInfo": 9
+      },
+      "other_enums": {
+        "JackpotType": {
+          "Item": 1,
+          "MapPart": 2
+        }
+      }
+    },
+    "Zone": {
+      "id": 24,
+      "source": "ZoneProtocol.cs",
+      "requests": {
+        "Join": 1,
+        "Leave": 2,
+        "ScoreboardSubscribe": 3,
+        "ScoreboardUnsubscribe": 4,
+        "UseFtlOverride": 5,
+        "AdmissionStatus": 6
+      },
+      "replies": {
+        "ActiveZones": 1,
+        "UpcomingZones": 2,
+        "ScoreKillspam": 3,
+        "ScoreNemesisUpdate": 4,
+        "ScoreSpreeUpdate": 5,
+        "ScoreLeaderUpdate": 6,
+        "ScoreboardUpdate": 7,
+        "FactionBoardUpdate": 8,
+        "FactionBoardTickets": 9,
+        "AdmissionStatus": 10
+      },
+      "other_enums": {
+        "AddRemove": {
+          "Add": 1,
+          "Remove": 2
+        }
+      }
+    }
+  },
+  "protocols_without_client_class": [
+    "Battlespace",
+    "Market",
+    "Ship",
+    "Tournament"
+  ]
+}

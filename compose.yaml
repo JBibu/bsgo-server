@@ -1,0 +1,60 @@
+volumes:
+  # Postgres data. Survives `docker compose down`; wiping it needs
+  # `docker compose down -v`.
+  db-data:
+
+services:
+  # Work environment: decompile the client, extract assets, build the server.
+  # Stays up; used through `docker compose exec toolchain ...`
+  toolchain:
+    build:
+      context: .
+      dockerfile: docker/toolchain.Dockerfile
+    image: bsgo/toolchain:latest
+    container_name: bsgo-toolchain
+    user: "${UID:-1000}:${GID:-1000}"
+    volumes:
+      # :z -> SELinux relabel (Fedora in Enforcing); without it the container
+      # cannot read the bind mount.
+      - .:/work:z
+    working_dir: /work
+    stdin_open: true
+    tty: true
+
+  # Persistence: accounts, characters, ships, inventory, progress.
+  db:
+    image: postgres:17-alpine
+    container_name: bsgo-db
+    environment:
+      POSTGRES_DB: bsgo
+      POSTGRES_USER: bsgo
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-bsgo_dev}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      # Loopback only: for inspecting with psql from the host.
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bsgo -d bsgo"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  # The game server. `docker compose up server` leaves it listening.
+  server:
+    build:
+      context: .
+      dockerfile: docker/server.Dockerfile
+    image: bsgo/server:latest
+    container_name: bsgo-server
+    ports:
+      # Loopback only: the client runs on this same machine. To open it to the
+      # local network use "27050:27050" (and accept that anyone can connect).
+      - "127.0.0.1:27050:27050"
+      # The client asks for Unity's socket policy on the next port.
+      - "127.0.0.1:27051:27051"
+    environment:
+      Server__ListenAddress: "0.0.0.0"
+      Server__Port: "27050"
+    restart: unless-stopped

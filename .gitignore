@@ -1,0 +1,17 @@
+# --- BigPoint proprietary material: NEVER commit -------------------------
+# The client binaries and their decompilation belong to BigPoint. This repo
+# must only contain derived specifications and our own implementation.
+client-ref/
+decompiled/
+*.dll
+*.exe
+*.assets
+*.resource
+
+# --- Container caches ----------------------------------------------------
+.container/
+
+# --- .NET -----------------------------------------------------------------
+bin/
+obj/
+*.user

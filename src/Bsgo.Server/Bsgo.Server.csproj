@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bsgo.Protocol\Bsgo.Protocol.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Fijado a 9.x: el proyecto es net9.0 y la 10.x arrastra dependencias de .NET 10. -->
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.11" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../data/avatar-catalogue.json" Link="data/avatar-catalogue.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../data/rooms.json" Link="data/rooms.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

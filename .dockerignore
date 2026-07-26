@@ -1,0 +1,10 @@
+# Host build artefacts: copied into the context, the in-container restore
+# clashes with paths and versions that do not exist in the image.
+**/bin/
+**/obj/
+.container/
+
+# Proprietary client material: must not end up in any image.
+client-ref/
+
+.git/

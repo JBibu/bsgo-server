@@ -1,0 +1,21 @@
+{
+  "_note": "Playable rooms. The prefabs are the client's own (see assetmap.json) WITHOUT the .prefab extension: the client appends it, and if it is already there it requests 'cic_cylon.prefab.prefab' and the room never loads. The identifiers are chosen by the server, because Bigpoint's originals are not preserved.",
+  "rooms": [
+    {
+      "cardGuid": 1001,
+      "sectorId": 242,
+      "faction": "Colonial",
+      "prefabName": "cic_human",
+      "radius": 100.0,
+      "music": ""
+    },
+    {
+      "cardGuid": 1002,
+      "sectorId": 242,
+      "faction": "Cylon",
+      "prefabName": "cic_cylon",
+      "radius": 100.0,
+      "music": ""
+    }
+  ]
+}

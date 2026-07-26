@@ -1,0 +1,70 @@
+using Bsgo.Server.Catalogue;
+using Bsgo.Server.Net;
+using Bsgo.Server.Players;
+using Bsgo.Server.Protocols;
+using Bsgo.Server.Scenes;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Bsgo.Server;
+
+/// <summary>
+/// The server's composition root.
+/// </summary>
+/// <remarks>
+/// Lives here rather than in <c>Program</c> so the tests spin up the very same
+/// set of services. When the two lists were maintained separately, registering
+/// a handler in one and forgetting the other left the tests passing against a
+/// composition the real server never had.
+/// </remarks>
+public static class ServerServices
+{
+    /// <summary>Where the generated game data files live, relative to the binary.</summary>
+    public static string DataDirectory => Path.Combine(AppContext.BaseDirectory, "data");
+
+    public static string DataFile(string name) => Path.Combine(DataDirectory, name);
+
+    public static IServiceCollection AddBsgoServer(this IServiceCollection services)
+    {
+        // TODO: replace with a Postgres-backed store (the `db` container is
+        // already up). With this one, characters are lost on restart.
+        services.AddSingleton<IPlayerStore, InMemoryPlayerStore>();
+
+        // Static game data, generated from the client's assets.
+        services.AddSingleton(_ => AvatarCatalogue.LoadFrom(DataFile("avatar-catalogue.json")));
+        services.AddSingleton(_ => RoomCatalogue.LoadFrom(DataFile("rooms.json")));
+
+        // Card sources. A new kind of card is a provider registered here, with
+        // no changes to the catalogue handler.
+        services.AddSingleton<ICardProvider, AvatarCardProvider>();
+        services.AddSingleton<ICardProvider, RoomCardProvider>();
+
+        services.AddSingleton<SceneDirector>();
+
+        services.AddProtocolHandler<LoginProtocolHandler>();
+        services.AddProtocolHandler<SyncProtocolHandler>();
+        services.AddProtocolHandler<SceneProtocolHandler>();
+        services.AddProtocolHandler<PlayerProtocolHandler>();
+        services.AddProtocolHandler<SettingProtocolHandler>();
+        services.AddProtocolHandler<CatalogueProtocolHandler>();
+
+        services.AddHostedService<BgoListener>();
+        return services;
+    }
+
+    /// <summary>
+    /// Registers a handler once and exposes it under every role it implements.
+    /// </summary>
+    /// <remarks>
+    /// A handler that also pushes data on entry must be the same instance in
+    /// both roles, hence the single registration plus forwarding.
+    /// </remarks>
+    private static void AddProtocolHandler<T>(this IServiceCollection services)
+        where T : class, IProtocolHandler
+    {
+        services.AddSingleton<T>();
+        services.AddSingleton<IProtocolHandler>(sp => sp.GetRequiredService<T>());
+
+        if (typeof(IPlayerEnteredHook).IsAssignableFrom(typeof(T)))
+            services.AddSingleton(sp => (IPlayerEnteredHook)sp.GetRequiredService<T>());
+    }
+}
