@@ -46,7 +46,7 @@ public class ShipCardTests
 
         Assert.Equal(0, r.ReadLength());               // roles
         Assert.Equal(0, r.ReadByte());                 // deprecated role
-        Assert.Equal(string.Empty, r.ReadString());    // paperdoll layout
+        Assert.Equal(ship.Paperdoll, r.ReadString());  // paperdoll layout
 
         // Slots: the Viper has 3 weapon, 2 hull, 4 engine and 2 computer.
         Assert.Equal(11, r.ReadLength());
@@ -112,6 +112,21 @@ public class ShipCardTests
         foreach (var column in Catalogue.Ships.SelectMany(s => s.Stats.Keys).Distinct())
             Assert.True(ShipCardProvider.StatFor(column) is not null,
                 $"the table has a \"{column}\" column with no matching ObjectStat");
+    }
+
+    [Fact]
+    public void A_ship_a_player_can_be_given_names_its_paperdoll_layout()
+    {
+        // The client loads the layout only when the name is non-empty, then
+        // reads it unconditionally. A starter ship without one puts the hangar
+        // in a throw-per-frame loop, which is what the whole room entry was
+        // blocked on to begin with.
+        foreach (var faction in new[] { Faction.Colonial, Faction.Cylon })
+        {
+            var starter = Catalogue.StarterFor(faction);
+            Assert.NotNull(starter);
+            Assert.NotEmpty(starter.Paperdoll);
+        }
     }
 
     [Fact]

@@ -73,7 +73,7 @@ public sealed class ShipCardProvider(ShipCatalogue catalogue) : ICardProvider
 
         w.WriteLength(0);                // roles
         w.Write((byte)0);                // deprecated role
-        w.Write(string.Empty);           // paperdoll layout: the client skips it when empty
+        w.Write(ship.Paperdoll);         // paperdoll layout, see ShipDefinition.Paperdoll
 
         WriteSlots(ship, w);
 

@@ -46,6 +46,16 @@ public sealed class ShipDefinition
     /// </remarks>
     [JsonPropertyName("prefab")] public string Prefab { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Layout file the hangar's paperdoll is drawn from, without its path.
+    /// </summary>
+    /// <remarks>
+    /// Not optional in practice. The client only loads it when the name is
+    /// non-empty, and then reads the result unconditionally — an empty name
+    /// leaves the layout null and the hangar throws on it once per frame.
+    /// </remarks>
+    [JsonPropertyName("paperdoll")] public string Paperdoll { get; set; } = string.Empty;
+
     [JsonPropertyName("slots")] public ShipSlots Slots { get; set; } = new();
 
     [JsonPropertyName("stats")]
