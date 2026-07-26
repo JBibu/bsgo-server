@@ -52,11 +52,24 @@ public sealed class Hangar(
     /// <remarks>
     /// A character with no faction yet is mid-creation and gets nothing; there
     /// is no neutral ship to give.
+    /// <para>
+    /// A stored ship that no longer answers counts as no ship. Card identifiers
+    /// are derived from the ship's name, so renaming one in the table orphans
+    /// everybody flying it — and a player who reached the room with nothing in
+    /// their hangar is the exact failure this class exists to prevent, arriving
+    /// silently by another door.
+    /// </para>
     /// </remarks>
     public async Task<ShipDefinition?> EnsureShipAsync(PlayerRecord player, CancellationToken ct = default)
     {
         if (player.ShipCardGuid != 0)
-            return ships.Find(player.ShipCardGuid);
+        {
+            if (ships.Find(player.ShipCardGuid) is { } owned) return owned;
+
+            logger.LogWarning(
+                "Player {PlayerId} holds ship {Card}, which the table no longer describes; "
+                + "replacing it", player.Id, player.ShipCardGuid);
+        }
 
         if (ships.StarterFor(player.Faction) is not { } starter)
             return null;

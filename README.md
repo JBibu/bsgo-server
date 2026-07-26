@@ -22,7 +22,7 @@ analysis of the client.
 | Generated C# message enums | Generated from the spec |
 | Login handshake | Working end to end |
 | Character creation (faction, avatar, name) | Working against the real client |
-| Room entry | Enabled, not yet confirmed with the client |
+| Room entry | Working against the real client |
 | Persistence | Characters in Postgres; no accounts yet |
 | Ships | All 64 served as catalogue cards; players get their faction's starter |
 
@@ -135,11 +135,11 @@ around it with a `C:\bsgo` link.
 
 ## Known limitations
 
-**Room entry is enabled but unconfirmed.** It was shut while players had no
-ship, because the hangar window reaches for the active one and, finding none,
-threw inside the client's `Update` — once per frame, instantiating the scenery
-each time, until memory ran out. Players now have a ship and the flag is on, but
-no run of the real client has confirmed the room actually loads.
+**The shop, chat and several catalogue cards are not implemented.** The room
+loads and can be walked out of, but opening the shop puts the client in a
+throw-per-frame loop of its own — it asks a protocol nothing answers and then
+reads the reply it never got. Chat does the same on Enter. Neither touches the
+room itself.
 
 **There are no accounts.** Characters are stored in Postgres and survive a
 restart, but nothing above them is: the login believes whatever identifier the

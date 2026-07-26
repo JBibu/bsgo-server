@@ -39,10 +39,11 @@ exception — `bsgo_Data/output_log.txt` inside the Wine prefix.
   `KeyNotFoundException` inside the client.
 - **Payload field order is the whole contract.** There are no tags: one field
   too many or too few shifts everything after it.
-- **Room entry is on but unproven against the client.** If the hangar loads
-  forever, or the client dies instantiating the scenery in a loop, the ship
-  cards are the first place to look — a field out of place there reports
-  nothing.
+- **A player must never reach the room without an active ship.** The hangar
+  window reads it while building the UI, inside `Update`, so a null there
+  throws once per frame and instantiates the scenery on every attempt until
+  memory runs out. `Hangar` is what guarantees it; the same failure arrives
+  through an empty paperdoll layout on the ship's card.
 
 ## Layout
 
