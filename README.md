@@ -24,6 +24,7 @@ analysis of the client.
 | Character creation (faction, avatar, name) | Working against the real client |
 | Room entry | Disabled: needs ships (see below) |
 | Persistence | Characters in Postgres; no accounts yet |
+| Ship stats | All 64 in `data/ships.json`; not wired to the server yet |
 
 ## Layout
 
@@ -144,10 +145,10 @@ restart, but nothing above them is: the login believes whatever identifier the
 client offers, so sessions are not validated and any client is accepted as any
 player.
 
-**Ship, sector and item data do not exist.** Unlike the avatar pieces — whose
-names could be recovered from the client's meshes — stats such as armour or
-speed lived on Bigpoint's server and are not preserved anywhere. They have to be
-invented.
+**Weapon, system and sector data do not exist.** Ship stats do — `data/ships.json`
+has all 64 with their full stat block — but the tables around them were the
+original server's and are not preserved. A server with ships and no weapons is
+not playable, so those values would have to be invented.
 
 ## Contributing
 

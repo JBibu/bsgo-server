@@ -1,82 +1,68 @@
 # Working on bsgo-server
 
-A server emulator for *Battlestar Galactica Online*, a game Bigpoint shut down
-in 2019. The client still exists; the server does not. This project rebuilds it
-by deriving the protocol from the client and implementing it from scratch.
+See `README.md` for what this project is and where it stands.
 
-## Ground rules
+## Rules
 
-**Never commit game files.** The client binaries, its decompilation and its
-assetbundles are Bigpoint's. They live in `client-ref/`, which is git-ignored
-and excluded from Docker builds. What the repo may contain is *derived
-specification* (message ids, byte layouts, asset names needed to interoperate)
-and our own implementation.
-
-**Everything runs in Docker.** The .NET SDK, the ILSpy decompiler and the Python
-tooling live in the `toolchain` image. Do not install them on the host.
+- **Never commit game files.** The client binaries, their decompilation and the
+  assetbundles are Bigpoint's. They live in `client-ref/`, git-ignored and out
+  of Docker builds. The repo holds derived specification and our own code.
+- **Everything runs in Docker.** Do not install the .NET SDK, ILSpy or the
+  Python tooling on the host.
+- **Never hand-edit `src/Bsgo.Protocol/Generated/*.g.cs`.** Regenerate instead.
 
 ```bash
-docker compose exec toolchain dotnet test     # 105 tests; needs the db container up
+docker compose exec toolchain dotnet test    # needs the db container up
 docker compose exec toolchain dotnet build
-docker compose up -d server                   # listens on 27050
+docker compose up -d server                  # listens on 27050
 docker compose logs -f server
+tools/run-client.sh                          # the real client against the local server
 ```
 
-## How this codebase is worked on
+## Debugging
 
-The protocol was not documented anywhere; it was recovered one screen at a time
-by the same loop, which still applies:
+Read **both** logs. The server's says what arrived; the client's has the
+exception — `bsgo_Data/output_log.txt` inside the Wine prefix.
 
-1. Implement what the client last asked for.
-2. Run the client against the server and read **both** logs. The server's say
-   what arrived; the client's (`bsgo_Data/output_log.txt` inside the Wine
-   prefix) say why it did nothing with it.
-3. The warnings name the next thing to build.
+## Invariants
 
-`tools/run-client.sh` launches the real client against the local server.
-
-**The client's log is the primary diagnostic tool.** Every hard bug in this
-project was found there, never by staring at the server. A silent client is not
-a mystery: it has an exception with a stack trace.
-
-## Invariants that will bite you
-
-These were each found the hard way. Breaking them produces **no error** — just a
-client that hangs, or draws nothing.
-
-- **The framing length prefix is big-endian.** Everything else in the protocol,
-  including the message type right after it, is little-endian. Get it wrong and
-  the client waits forever for a message that never completes.
-- **Protocol revision `4578`.** The client compares it in the second handshake
-  message and disconnects on a mismatch.
+- **The framing length prefix is big-endian.** Everything after it, including
+  the message type, is little-endian.
+- **Protocol revision `4578`.** A mismatch disconnects the client.
 - **Port `27050` is hardcoded in the client.** `+gameServer` only sets the IP.
-- **Every action that completes a screen must end in a scene transition.** The
-  client never advances by itself; it sits on "Please wait" until the server
-  tells it where to go. Confirming the action is not enough.
-- **Asset extensions are not uniform.** The client appends `.prefab` itself, so
-  prefab names must not carry it; materials need `.mat`, textures `.tga`/`.png`.
-  A wrong name draws nothing and logs nothing on the server.
-- **Card and catalogue keys are looked up by exact name.** A missing key throws
-  `KeyNotFoundException` inside the client while reading the card.
-- **Payload field order is the whole contract.** There are no tags, so one field
-  too many or too few shifts everything after it. Tests re-read payloads field
-  by field for this reason.
+- **Every action that completes a screen must end in a scene transition**, or
+  the client sits on "Please wait" indefinitely. Confirming the action is not
+  enough.
+- **Asset extensions are not uniform.** Prefab names must not carry `.prefab`,
+  the client appends it; materials need `.mat`, textures `.tga`/`.png`.
+- **Card and catalogue keys are looked up by exact name.** A missing one throws
+  `KeyNotFoundException` inside the client.
+- **Payload field order is the whole contract.** There are no tags: one field
+  too many or too few shifts everything after it.
+- **Do not enable `ServerOptions.EnableRoomEntry` until players have a ship.**
 
 ## Layout
 
 ```
 spec/       protocol.json (generated) + wire-format.md (hand-written)
 tools/      generators: protocol spec -> C# enums; client assets -> game data
-data/       generated game data (avatar pieces, rooms)
+data/       avatar pieces and rooms (generated), ships (hand-edited)
 src/Bsgo.Protocol/   wire format and framing, no server dependencies
 src/Bsgo.Server/     listener, sessions, one handler per protocol
 tests/               wire tests byte by byte; protocol flows against a real server
 ```
 
-**The protocol is generated, not written.** 445 message types across 25
-protocols, plus the 7 enums that travel inside them (`Faction`, `CardView`,
-`GameLocation`, `AvatarItem`…), come from `spec/protocol.json`. Never hand-edit
-`Generated/*.g.cs`. To pick up a change in the client:
+## Extension points
+
+- **New protocol**: implement `IProtocolHandler`, register with
+  `AddProtocolHandler<T>()`.
+- **New catalogue card**: implement `ICardProvider`, register it.
+- **Data pushed on login**: implement `IPlayerEnteredHook` with an `Order`. The
+  avatar catalogue must reach the client before the faction reply.
+- **Composition**: `ServerServices.AddBsgoServer()`, shared by the server and
+  the tests. A connection string wires Postgres, none wires the in-memory store.
+
+## Regenerating the protocol
 
 ```bash
 docker compose exec toolchain python3 tools/extract_protocol_spec.py \
@@ -85,48 +71,11 @@ docker compose exec toolchain python3 tools/generate_protocol_cs.py \
     spec/protocol.json src/Bsgo.Protocol/Generated
 ```
 
-The one thing the client cannot tell us is how wide each of those enums is on
-the wire: it declares them all as plain `enum`, and what actually goes out is
-decided by how it reads them back. That table is `SHARED_ENUMS` in the
-extractor, one line per enum with the client's read alongside it.
+The client declares the 7 shared enums as plain `enum`, so their wire width is
+not in it: that table is `SHARED_ENUMS` in the extractor.
 
-## Extension points
+## Editing data/ships.json
 
-Adding to the server should not mean editing a dispatcher:
-
-- **New protocol**: implement `IProtocolHandler`, register with
-  `AddProtocolHandler<T>()` in `ServerServices`.
-- **New catalogue card**: implement `ICardProvider`, register it. The catalogue
-  handler stays untouched.
-- **Data pushed on login**: implement `IPlayerEnteredHook` and give it an
-  `Order`. Order matters — the avatar catalogue must reach the client before the
-  faction reply.
-- **Composition lives in `ServerServices.AddBsgoServer()`**, used by both the
-  server and the tests, so they cannot drift apart. Given a connection string it
-  wires Postgres; without one, the in-memory store. Whatever a handler needs
-  from a character goes through `IPlayerStore` — no handler knows which of the
-  two it is holding, and `PlayerStoreContract` runs the same tests over both.
-
-## Current state
-
-Working: login, character creation (faction, avatar, name) against the real
-client. Characters persist in Postgres and survive a restart.
-
-Not working, and why:
-
-- **Room entry is disabled** (`ServerOptions.EnableRoomEntry`). The hangar
-  window reads the player's active ship; there are no ships. Being null it
-  throws inside the client's `Update`, which retries every frame and
-  instantiates the scenery once per attempt until it runs out of memory.
-- **Sessions are not validated.** Any client is accepted as any player. There
-  are characters but no accounts: the login takes whatever identifier the client
-  offers.
-
-## The wall ahead
-
-Avatar piece names could be *recovered* — they are the names of meshes in the
-client's assetbundles. Ship stats, sector layouts and item tables cannot: they
-lived on Bigpoint's server and are preserved nowhere. Implementing ships means
-**inventing** those values, at which point the project stops reconstructing the
-original game and starts defining its own. That is a design decision for the
-maintainer, not something to slip in while implementing a protocol.
+Hand-edited. `ShipTableTests` enforces its rules — run the tests after changing
+a value. It only carries stats the client has in `ObjectStat`; anything else is
+noise the server can never send.
