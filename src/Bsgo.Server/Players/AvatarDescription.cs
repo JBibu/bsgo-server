@@ -2,31 +2,6 @@ using Bsgo.Protocol;
 
 namespace Bsgo.Server.Players;
 
-/// <summary>An avatar customisation slot.</summary>
-public enum AvatarItem : byte
-{
-    Race = 0,
-    Sex = 1,
-    HumanHead = 2,
-    HumanFace = 3,
-    HumanHands = 4,
-    HumanGlasses = 5,
-    HumanHelmet = 6,
-    HumanHair = 7,
-    HumanHairColor = 8,
-    HumanSuit = 9,
-    HumanBeard = 10,
-    HumanBeardColor = 11,
-    CylonHead = 12,
-    CylonHeadSkin = 13,
-    CylonArms = 14,
-    CylonArmsSkin = 15,
-    CylonBody = 16,
-    CylonBodySkin = 17,
-    CylonLegs = 18,
-    CylonLegsSkin = 19,
-}
-
 /// <summary>
 /// The appearance chosen for a character: which piece fills each slot.
 /// </summary>

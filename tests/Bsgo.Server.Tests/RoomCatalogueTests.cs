@@ -1,7 +1,5 @@
 using Bsgo.Protocol;
 using Bsgo.Server.Catalogue;
-using Bsgo.Server.Players;
-using Xunit;
 
 namespace Bsgo.Server.Tests;
 

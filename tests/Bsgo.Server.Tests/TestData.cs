@@ -1,4 +1,3 @@
-using Bsgo.Server;
 using Bsgo.Server.Catalogue;
 
 namespace Bsgo.Server.Tests;

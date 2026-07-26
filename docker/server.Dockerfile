@@ -4,6 +4,11 @@ WORKDIR /src
 
 # Restore separate from the code: the dependency layer is cached across builds.
 COPY Bsgo.sln .
+# Carries TargetFramework and friends: without it the projects below build
+# against nothing. The .editorconfig comes along because the props file turns
+# its rules into build warnings, and the image should build under the same
+# rules as the developer's machine.
+COPY Directory.Build.props .editorconfig ./
 COPY src/Bsgo.Protocol/Bsgo.Protocol.csproj src/Bsgo.Protocol/
 COPY src/Bsgo.Server/Bsgo.Server.csproj src/Bsgo.Server/
 COPY tests/Bsgo.Protocol.Tests/Bsgo.Protocol.Tests.csproj tests/Bsgo.Protocol.Tests/

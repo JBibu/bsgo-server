@@ -1,5 +1,4 @@
 using Bsgo.Protocol;
-using Bsgo.Server.Protocols;
 
 namespace Bsgo.Server.Catalogue;
 

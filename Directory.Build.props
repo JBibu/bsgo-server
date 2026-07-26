@@ -1,0 +1,28 @@
+<Project>
+
+  <!--
+    Settings shared by every project. Stated once so the four .csproj files
+    cannot quietly disagree about which framework or which nullability rules
+    they are built under.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!--
+      Turns the code-style rules in .editorconfig into build warnings, so
+      leftovers like an unused using show up on `dotnet build` rather than
+      accumulating. The documentation file is what IDE0005 needs to run at
+      build time. The two warnings switched off below come with it and demand a
+      convention this project does not hold: comments here explain the one
+      parameter that is surprising, not every member and every argument.
+    -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- CS1591: public member without a doc comment.
+         CS1573: some parameters documented, not all. -->
+    <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
+  </PropertyGroup>
+
+</Project>

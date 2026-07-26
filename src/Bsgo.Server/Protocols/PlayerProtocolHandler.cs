@@ -1,10 +1,8 @@
 using Bsgo.Protocol;
 using Bsgo.Server.Net;
-using Bsgo.Server.Catalogue;
 using Bsgo.Server.Players;
 using Bsgo.Server.Scenes;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Bsgo.Server.Protocols;
 
@@ -14,8 +12,6 @@ namespace Bsgo.Server.Protocols;
 /// </summary>
 public sealed class PlayerProtocolHandler(
     IPlayerStore store,
-    IOptions<ServerOptions> options,
-    RoomCatalogue rooms,
     SceneDirector scenes,
     ILogger<PlayerProtocolHandler> logger) : IProtocolHandler, IPlayerEnteredHook
 {
@@ -25,8 +21,8 @@ public sealed class PlayerProtocolHandler(
     /// Sends the player their identifier on entry, so the client keeps it and
     /// identifies with it next time.
     /// </summary>
-    public Task OnPlayerEnteredAsync(BgoConnection connection, CancellationToken ct) =>
-        SendIdAsync(connection, store.GetOrCreate(connection.State.PlayerId), ct);
+    public Task OnPlayerEnteredAsync(BgoConnection connection, PlayerRecord player, CancellationToken ct) =>
+        SendIdAsync(connection, player, ct);
 
     public Task HandleAsync(BgoConnection connection, ushort messageType, ReadOnlyMemory<byte> payload, CancellationToken ct)
         => (PlayerRequest)messageType switch
@@ -43,15 +39,16 @@ public sealed class PlayerProtocolHandler(
         var r = new BgoReader(payload.Span);
         var faction = (Faction)r.ReadByte();
 
-        var player = store.GetOrCreate(connection.State.PlayerId);
+        var player = await store.GetOrCreateAsync(connection.State.PlayerId, ct);
         player.Faction = faction;
-        store.Save(player);
+        await store.SaveAsync(player, ct);
 
         logger.LogInformation("Player {PlayerId} chose {Faction}", player.Id, faction);
 
         // The client needs all three to build the next screen: who they are,
         // what they are called, and which side they are on.
         await SendIdAsync(connection, player, ct);
+        await SendAvatarAsync(connection, player, ct);
         await SendFactionAsync(connection, player, ct);
         await SendNameAsync(connection, player, ct);
 
@@ -60,17 +57,17 @@ public sealed class PlayerProtocolHandler(
         await scenes.SendToAvatarCreationAsync(connection, ct);
     }
 
-    private Task CheckNameAsync(BgoConnection connection, ReadOnlyMemory<byte> payload, CancellationToken ct)
+    private async Task CheckNameAsync(BgoConnection connection, ReadOnlyMemory<byte> payload, CancellationToken ct)
     {
         var r = new BgoReader(payload.Span);
         string name = r.ReadString();
 
-        bool available = store.IsNameAvailable(name, connection.State.PlayerId);
+        bool available = await store.IsNameAvailableAsync(name, connection.State.PlayerId, ct);
         logger.LogInformation("Name \"{Name}\": {Result}", name, available ? "free" : "taken");
 
         // Both replies carry no payload.
         var reply = available ? PlayerReply.NameAvailable : PlayerReply.NameNotAvailable;
-        return connection.SendAsync(ProtocolId.Player, (ushort)reply, ct);
+        await connection.SendAsync(ProtocolId.Player, (ushort)reply, ct);
     }
 
     private async Task ChooseNameAsync(BgoConnection connection, ReadOnlyMemory<byte> payload, CancellationToken ct)
@@ -78,16 +75,16 @@ public sealed class PlayerProtocolHandler(
         var r = new BgoReader(payload.Span);
         string name = r.ReadString();
 
-        if (!store.IsNameAvailable(name, connection.State.PlayerId))
+        if (!await store.IsNameAvailableAsync(name, connection.State.PlayerId, ct))
         {
             logger.LogWarning("Name \"{Name}\" rejected: already in use", name);
             await connection.SendAsync(ProtocolId.Player, (ushort)PlayerReply.NameNotAvailable, ct);
             return;
         }
 
-        var player = store.GetOrCreate(connection.State.PlayerId);
+        var player = await store.GetOrCreateAsync(connection.State.PlayerId, ct);
         player.Name = name;
-        store.Save(player);
+        await store.SaveAsync(player, ct);
         connection.State.PlayerName = name;
 
         logger.LogInformation("Player {PlayerId} is now named \"{Name}\"", player.Id, name);
@@ -102,9 +99,9 @@ public sealed class PlayerProtocolHandler(
         var r = new BgoReader(payload.Span);
         var avatar = AvatarDescription.Read(ref r);
 
-        var player = store.GetOrCreate(connection.State.PlayerId);
+        var player = await store.GetOrCreateAsync(connection.State.PlayerId, ct);
         player.AvatarDescription = avatar.ToBytes();
-        store.Save(player);
+        await store.SaveAsync(player, ct);
 
         logger.LogInformation(
             "Avatar created for {PlayerId}: {Race}/{Sex}, {Slots} slots",
@@ -115,28 +112,10 @@ public sealed class PlayerProtocolHandler(
 
         await SendAvatarAsync(connection, avatar, ct);
 
-        // Character finished: this is where they would go to their faction's
-        // room, but with no ship the client hangs instantiating the scenery in
-        // a loop (see ServerOptions.EnableRoomEntry).
-        if (!options.Value.EnableRoomEntry)
-        {
-            logger.LogWarning(
-                "Room entry disabled: player {PlayerId} stays in character creation. "
-                + "They need a ship before the hangar can be entered.",
-                player.Id);
-            return;
-        }
-
-        var room = rooms.ForFaction(player.Faction);
-        if (room is null)
-        {
-            logger.LogError(
-                "No room defined for faction {Faction}: the client will be left waiting",
-                player.Faction);
-            return;
-        }
-
-        await scenes.SendToRoomAsync(connection, room.CardGuid, room.SectorId, ct);
+        // The character is finished, so this is where they walk into the game.
+        // If they cannot yet, they stay on the creation screen they are already
+        // looking at — which is a scene, so nothing hangs.
+        await scenes.TrySendIntoTheGameAsync(connection, player, ct);
     }
 
     private static Task SendAvatarAsync(BgoConnection connection, AvatarDescription avatar, CancellationToken ct)
@@ -145,6 +124,20 @@ public sealed class PlayerProtocolHandler(
         avatar.Write(w);
         return connection.SendAsync(ProtocolId.Player, (ushort)PlayerReply.Avatar, w, ct);
     }
+
+    /// <summary>
+    /// Sends whatever appearance the character has, even when that is nothing.
+    /// </summary>
+    /// <remarks>
+    /// This <b>must</b> reach the client before <see cref="PlayerReply.Faction"/>.
+    /// The faction reply asks the description whether it is empty in order to
+    /// fall back to a default look, and a character who has never sent one
+    /// leaves that field null: the read throws inside the client, which swallows
+    /// the exception and never dispatches the faction to the rest of the UI.
+    /// An empty description is fine — the client then picks its own default.
+    /// </remarks>
+    private static Task SendAvatarAsync(BgoConnection connection, PlayerRecord player, CancellationToken ct) =>
+        SendAvatarAsync(connection, AvatarDescription.FromBytes(player.AvatarDescription), ct);
 
     private static Task SendIdAsync(BgoConnection connection, PlayerRecord player, CancellationToken ct)
     {

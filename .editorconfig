@@ -1,0 +1,9 @@
+# Code-style rules promoted to build warnings by EnforceCodeStyleInBuild
+# (see Directory.Build.props). Only rules worth stopping for belong here.
+
+[*.cs]
+
+# An unused using is the residue of a refactor. Harmless in itself, but it
+# obscures what a file actually depends on — which, in these handlers, is the
+# thing worth reading at the top.
+dotnet_diagnostic.IDE0005.severity = warning

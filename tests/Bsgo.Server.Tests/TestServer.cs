@@ -3,7 +3,6 @@ using System.Buffers.Binary;
 using System.Net;
 using System.Net.Sockets;
 using Bsgo.Protocol;
-using Bsgo.Server.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -30,7 +29,12 @@ public sealed class TestServer : IAsyncDisposable
         Port = port;
     }
 
-    public static async Task<TestServer> StartAsync(Action<ServerOptions>? configure = null)
+    /// <param name="connectionString">
+    /// Given one, the server keeps its characters in Postgres, as it does in
+    /// production; without it, in memory. Most tests do not care which.
+    /// </param>
+    public static async Task<TestServer> StartAsync(
+        Action<ServerOptions>? configure = null, string? connectionString = null)
     {
         int port = GetFreePort();
 
@@ -43,7 +47,7 @@ public sealed class TestServer : IAsyncDisposable
         });
 
         // The very same registrations the real server uses.
-        builder.Services.AddBsgoServer();
+        builder.Services.AddBsgoServer(connectionString);
         builder.Logging.SetMinimumLevel(LogLevel.Warning);
 
         var host = builder.Build();
@@ -79,6 +83,36 @@ public sealed class TestClient(TcpClient client) : IDisposable
     private readonly NetworkStream _stream = client.GetStream();
 
     public int Available => client.Available;
+
+    /// <summary>The login payload, as the client sends it.</summary>
+    public static BgoWriter Credentials(uint playerId, string name = "Starbuck")
+    {
+        var w = new BgoWriter();
+        w.Write((byte)ConnectType.Web);
+        w.Write(playerId);
+        w.Write(name);
+        w.Write("c7faac2379e35f6404eced5f484210ba");
+        return w;
+    }
+
+    /// <summary>
+    /// Goes through the handshake and returns the identifier the player ends up
+    /// with — the one asked for, or the one the server assigned when asking for
+    /// 0, which is what a client with no character yet sends.
+    /// </summary>
+    /// <remarks>
+    /// For tests that need a logged-in player rather than tests of the login
+    /// itself; those are in <see cref="LoginHandshakeTests"/> and drive the
+    /// exchange message by message.
+    /// </remarks>
+    public async Task<uint> LogInAsync(uint playerId = 0, string name = "Starbuck")
+    {
+        await ReadAsync();   // Hello
+        await SendAsync(ProtocolId.Login, (ushort)LoginRequest.Player, Credentials(playerId, name));
+
+        var id = await ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.ID);
+        return new BgoReader(id.Payload).ReadUInt32();
+    }
 
     /// <summary>Reads a full message.</summary>
     /// <remarks>

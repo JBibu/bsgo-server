@@ -16,7 +16,7 @@ and our own implementation.
 tooling live in the `toolchain` image. Do not install them on the host.
 
 ```bash
-docker compose exec toolchain dotnet test     # 81 tests
+docker compose exec toolchain dotnet test     # 105 tests; needs the db container up
 docker compose exec toolchain dotnet build
 docker compose up -d server                   # listens on 27050
 docker compose logs -f server
@@ -74,10 +74,21 @@ tests/               wire tests byte by byte; protocol flows against a real serv
 ```
 
 **The protocol is generated, not written.** 445 message types across 25
-protocols come from `spec/protocol.json`. Never hand-edit `Generated/*.g.cs`.
-Enums transcribed by hand into `src/Bsgo.Server` (`CardView`, `GameLocation`,
-`AvatarItem`…) have already drifted from the client once — check them against
-`client-ref/decompiled/` when touching them.
+protocols, plus the 7 enums that travel inside them (`Faction`, `CardView`,
+`GameLocation`, `AvatarItem`…), come from `spec/protocol.json`. Never hand-edit
+`Generated/*.g.cs`. To pick up a change in the client:
+
+```bash
+docker compose exec toolchain python3 tools/extract_protocol_spec.py \
+    client-ref/decompiled spec/protocol.json
+docker compose exec toolchain python3 tools/generate_protocol_cs.py \
+    spec/protocol.json src/Bsgo.Protocol/Generated
+```
+
+The one thing the client cannot tell us is how wide each of those enums is on
+the wire: it declares them all as plain `enum`, and what actually goes out is
+decided by how it reads them back. That table is `SHARED_ENUMS` in the
+extractor, one line per enum with the client's read alongside it.
 
 ## Extension points
 
@@ -91,12 +102,15 @@ Adding to the server should not mean editing a dispatcher:
   `Order`. Order matters — the avatar catalogue must reach the client before the
   faction reply.
 - **Composition lives in `ServerServices.AddBsgoServer()`**, used by both the
-  server and the tests, so they cannot drift apart.
+  server and the tests, so they cannot drift apart. Given a connection string it
+  wires Postgres; without one, the in-memory store. Whatever a handler needs
+  from a character goes through `IPlayerStore` — no handler knows which of the
+  two it is holding, and `PlayerStoreContract` runs the same tests over both.
 
 ## Current state
 
 Working: login, character creation (faction, avatar, name) against the real
-client.
+client. Characters persist in Postgres and survive a restart.
 
 Not working, and why:
 
@@ -104,8 +118,9 @@ Not working, and why:
   window reads the player's active ship; there are no ships. Being null it
   throws inside the client's `Update`, which retries every frame and
   instantiates the scenery once per attempt until it runs out of memory.
-- **Everything is in memory.** The `db` container (Postgres) is up and unused.
-- **Sessions are not validated.** Any client is accepted as any player.
+- **Sessions are not validated.** Any client is accepted as any player. There
+  are characters but no accounts: the login takes whatever identifier the client
+  offers.
 
 ## The wall ahead
 

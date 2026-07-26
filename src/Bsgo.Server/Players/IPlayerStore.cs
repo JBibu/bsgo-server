@@ -1,3 +1,4 @@
+using Bsgo.Protocol;
 namespace Bsgo.Server.Players;
 
 /// <summary>Rules for character names.</summary>
@@ -27,13 +28,19 @@ public static class PlayerName
     }
 }
 
-/// <summary>Faction a character belongs to.</summary>
-public enum Faction : byte
+/// <summary>Rules for character identifiers.</summary>
+public static class PlayerId
 {
-    Neutral = 0,
-    Colonial = 1,
-    Cylon = 2,
-    Ancient = 3,
+    /// <summary>
+    /// The first identifier ever handed out.
+    /// </summary>
+    /// <remarks>
+    /// Starts high to stay clear of 0, which is what the client sends when it
+    /// has none yet. Handing that 0 back made every player share one character,
+    /// and the mistake fed itself: the client stored the 0 and sent it again on
+    /// the next start.
+    /// </remarks>
+    public const uint First = 1001;
 }
 
 /// <summary>Persistent state of a character.</summary>
@@ -64,14 +71,19 @@ public sealed class PlayerRecord
 /// Character store.
 /// </summary>
 /// <remarks>
-/// The current implementation is in-memory: characters are lost when the
-/// server restarts. This interface exists so that swapping it for Postgres
-/// does not force any change to the protocol handlers.
+/// Two implementations: <see cref="InMemoryPlayerStore"/>, which the tests use
+/// and which loses everything on restart, and <see cref="PostgresPlayerStore"/>,
+/// which the server uses. No protocol handler knows which one it holds.
+/// <para>
+/// Asynchronous because the real one talks to a database over a socket, and it
+/// is reached from the loop that serves the client's connection. A blocking
+/// call there stalls a thread pool thread on every login.
+/// </para>
 /// </remarks>
 public interface IPlayerStore
 {
     /// <summary>Fetches the character, creating an empty one on first use.</summary>
-    PlayerRecord GetOrCreate(uint playerId);
+    Task<PlayerRecord> GetOrCreateAsync(uint playerId, CancellationToken ct = default);
 
     /// <summary>
     /// Reserves a fresh identifier, unused by any character.
@@ -81,10 +93,27 @@ public interface IPlayerStore
     /// from a previous session and has none the first time. The server assigns
     /// one and the client keeps it from then on.
     /// </remarks>
-    uint AllocatePlayerId();
+    Task<uint> AllocatePlayerIdAsync(CancellationToken ct = default);
 
-    /// <summary>Whether the name is free (not already taken by another character).</summary>
-    bool IsNameAvailable(string name, uint requestingPlayerId);
+    /// <summary>Whether another character already goes by this name.</summary>
+    Task<bool> IsNameTakenAsync(string name, uint requestingPlayerId, CancellationToken ct = default);
 
-    void Save(PlayerRecord player);
+    Task SaveAsync(PlayerRecord player, CancellationToken ct = default);
+}
+
+public static class PlayerStoreExtensions
+{
+    /// <summary>Whether a character may be given this name.</summary>
+    /// <remarks>
+    /// Two separate questions, joined here rather than inside each store:
+    /// whether the name is allowed at all, which is no business of storage, and
+    /// whether somebody already holds it, which is. Left to the implementations
+    /// it had to be written twice, and a third one would have to remember it
+    /// unprompted — with the failure staying quiet, because an unusable name
+    /// would simply be reported as free.
+    /// </remarks>
+    public static async Task<bool> IsNameAvailableAsync(
+        this IPlayerStore store, string name, uint requestingPlayerId, CancellationToken ct = default) =>
+        PlayerName.IsValid(name)
+        && !await store.IsNameTakenAsync(name, requestingPlayerId, ct);
 }

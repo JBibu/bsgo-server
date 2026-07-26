@@ -1,5 +1,4 @@
-using Bsgo.Protocol;
-using Microsoft.Extensions.Logging;
+using Bsgo.Server.Players;
 
 namespace Bsgo.Server.Net;
 
@@ -22,29 +21,11 @@ public interface IPlayerEnteredHook
     /// </summary>
     int Order => 100;
 
-    Task OnPlayerEnteredAsync(BgoConnection connection, CancellationToken ct);
-}
-
-/// <summary>Shared logging for messages a protocol does not implement yet.</summary>
-public static class ProtocolLog
-{
-    /// <summary>
-    /// Logs an unhandled message, resolving the numeric type to its name.
-    /// </summary>
-    /// <remarks>
-    /// The name matters when reading logs: <c>Player</c> alone has 46 distinct
-    /// requests, and a bare number says nothing about what the client wanted.
-    /// </remarks>
-    public static Task Unhandled<TRequest>(ILogger logger, BgoConnection connection, ushort messageType)
-        where TRequest : struct, Enum
-    {
-        var request = (TRequest)Enum.ToObject(typeof(TRequest), messageType);
-        var name = Enum.IsDefined(request) ? request.ToString() : "unknown";
-
-        logger.LogWarning(
-            "Unimplemented {Protocol} request: {Name} ({Type}) from {Endpoint}",
-            typeof(TRequest).Name.Replace("Request", string.Empty),
-            name, messageType, connection.RemoteEndPoint);
-        return Task.CompletedTask;
-    }
+    /// <param name="player">
+    /// The character entering, read once by the login handler and handed to
+    /// every hook. Fetching it here rather than in each hook keeps a login from
+    /// asking the database for the same row once per hook that happens to need
+    /// it.
+    /// </param>
+    Task OnPlayerEnteredAsync(BgoConnection connection, PlayerRecord player, CancellationToken ct);
 }

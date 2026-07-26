@@ -4,6 +4,7 @@ using Bsgo.Server.Players;
 using Bsgo.Server.Protocols;
 using Bsgo.Server.Scenes;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace Bsgo.Server;
 
@@ -23,11 +24,28 @@ public static class ServerServices
 
     public static string DataFile(string name) => Path.Combine(DataDirectory, name);
 
-    public static IServiceCollection AddBsgoServer(this IServiceCollection services)
+    /// <param name="connectionString">
+    /// Where the characters live. Given one, the server persists to Postgres;
+    /// without it, everything stays in memory and is lost on restart — which is
+    /// what the tests want, and the only way to run without a database at hand.
+    /// </param>
+    public static IServiceCollection AddBsgoServer(
+        this IServiceCollection services, string? connectionString = null)
     {
-        // TODO: replace with a Postgres-backed store (the `db` container is
-        // already up). With this one, characters are lost on restart.
-        services.AddSingleton<IPlayerStore, InMemoryPlayerStore>();
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            services.AddSingleton<IPlayerStore, InMemoryPlayerStore>();
+        }
+        else
+        {
+            services.AddSingleton(_ => new NpgsqlDataSourceBuilder(connectionString).Build());
+            services.AddSingleton<IPlayerStore, PostgresPlayerStore>();
+
+            // Before the listener on purpose: hosted services start in the
+            // order they are registered, and no client may reach a server whose
+            // tables do not exist yet.
+            services.AddHostedService<PlayerSchema>();
+        }
 
         // Static game data, generated from the client's assets.
         services.AddSingleton(_ => AvatarCatalogue.LoadFrom(DataFile("avatar-catalogue.json")));

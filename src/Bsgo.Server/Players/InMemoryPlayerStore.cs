@@ -3,23 +3,20 @@ using System.Collections.Concurrent;
 namespace Bsgo.Server.Players;
 
 /// <summary>
-/// In-memory store. Enough to develop the protocol, but characters vanish on
-/// restart: replace with Postgres before anyone plays for real.
+/// In-memory store. Characters vanish on restart, so it is what the tests run
+/// against; the server uses <see cref="PostgresPlayerStore"/>.
 /// </summary>
 public sealed class InMemoryPlayerStore : IPlayerStore
 {
     private readonly ConcurrentDictionary<uint, PlayerRecord> _players = new();
 
-    /// <summary>
-    /// Identifiers start high to stay clear of 0, which the client sends when
-    /// it does not have one yet.
-    /// </summary>
-    private uint _nextId = 1000;
+    /// <summary>Incremented before use, so the first one handed out is <see cref="PlayerId.First"/>.</summary>
+    private uint _nextId = PlayerId.First - 1;
 
-    public PlayerRecord GetOrCreate(uint playerId) =>
-        _players.GetOrAdd(playerId, id => new PlayerRecord { Id = id });
+    public Task<PlayerRecord> GetOrCreateAsync(uint playerId, CancellationToken ct = default) =>
+        Task.FromResult(_players.GetOrAdd(playerId, id => new PlayerRecord { Id = id }));
 
-    public uint AllocatePlayerId()
+    public Task<uint> AllocatePlayerIdAsync(CancellationToken ct = default)
     {
         uint id;
         do
@@ -28,22 +25,24 @@ public sealed class InMemoryPlayerStore : IPlayerStore
         }
         while (_players.ContainsKey(id));
 
-        return id;
+        return Task.FromResult(id);
     }
 
-    public bool IsNameAvailable(string name, uint requestingPlayerId)
+    public Task<bool> IsNameTakenAsync(string name, uint requestingPlayerId, CancellationToken ct = default)
     {
-        if (!PlayerName.IsValid(name)) return false;
-
         // Enumerating the dictionary directly avoids the snapshot that
         // `.Values` takes, which locks every bucket and copies the whole set.
         foreach (var (id, player) in _players)
             if (id != requestingPlayerId &&
                 string.Equals(player.Name, name, StringComparison.OrdinalIgnoreCase))
-                return false;
+                return Task.FromResult(true);
 
-        return true;
+        return Task.FromResult(false);
     }
 
-    public void Save(PlayerRecord player) => _players[player.Id] = player;
+    public Task SaveAsync(PlayerRecord player, CancellationToken ct = default)
+    {
+        _players[player.Id] = player;
+        return Task.CompletedTask;
+    }
 }

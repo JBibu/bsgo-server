@@ -1,59 +1,10 @@
 using Bsgo.Protocol;
 using Bsgo.Server.Catalogue;
 using Bsgo.Server.Net;
+using Bsgo.Server.Players;
 using Microsoft.Extensions.Logging;
 
 namespace Bsgo.Server.Protocols;
-
-/// <summary>
-/// Catalogue card type. Determines how its contents are decoded: the client
-/// picks the reader from this value, so the payload format depends entirely
-/// on it.
-/// </summary>
-public enum CardView : ushort
-{
-    GUI = 1,
-    ShipSystem = 2,
-    ShipConsumable = 3,
-    World = 4,
-    Global = 5,
-    ShipAbility = 6,
-    Counter = 7,
-    Skill = 8,
-    Ship = 10,
-    Sector = 11,
-    Starter = 13,
-    Room = 14,
-    Mission = 16,
-    Reward = 18,
-    Title = 19,
-    Duty = 20,
-    AvatarCatalogue = 21,
-    Module = 22,
-    Price = 23,
-    Missile = 24,
-    ShipList = 25,
-    StickerList = 26,
-    Movement = 28,
-    Owner = 29,
-    GalaxyMap = 30,
-    Camera = 31,
-    MailTemplate = 32,
-    StarterKit = 34,
-    ShipPaint = 35,
-    Regulation = 36,
-    ShipSale = 37,
-    SectorEvent = 38,
-    Tournament = 39,
-    MapPart = 40,
-    MapPartSet = 41,
-    ShipLight = 42,
-    EventShop = 43,
-    GlobalBonusEvent = 44,
-    Banner = 45,
-    ConversionCampaign = 46,
-    Zone = 47,
-}
 
 /// <summary>
 /// Catalogue of static game data: ships, items, sectors, missions.
@@ -84,7 +35,7 @@ public sealed class CatalogueProtocolHandler(
     /// </summary>
     public int Order => 0;
 
-    public Task OnPlayerEnteredAsync(BgoConnection connection, CancellationToken ct) =>
+    public Task OnPlayerEnteredAsync(BgoConnection connection, PlayerRecord player, CancellationToken ct) =>
         SendCardAsync(connection, AvatarCatalogue.CardGuid, CardView.AvatarCatalogue, ct);
 
     public Task HandleAsync(BgoConnection connection, ushort messageType, ReadOnlyMemory<byte> payload, CancellationToken ct)

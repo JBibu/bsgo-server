@@ -23,7 +23,7 @@ analysis of the client.
 | Login handshake | Working end to end |
 | Character creation (faction, avatar, name) | Working against the real client |
 | Room entry | Disabled: needs ships (see below) |
-| Persistence | In memory only |
+| Persistence | Characters in Postgres; no accounts yet |
 
 ## Layout
 
@@ -97,8 +97,9 @@ docker compose exec toolchain bash -c '
 
 ## Design notes
 
-**The protocol is generated, not written.** There are 445 message types; by
-hand they drift out of sync. `spec/protocol.json` is the single source of truth.
+**The protocol is generated, not written.** There are 445 message types, plus
+the enums that travel inside them; by hand they drift out of sync.
+`spec/protocol.json` is the single source of truth.
 
 **The protocol revision is `4578`.** The client compares it against its own in
 the second handshake message and drops the connection on a mismatch.
@@ -138,10 +139,10 @@ it throws while building the UI, and since the failure happens inside the
 client's `Update`, it retries every frame and instantiates the scenery once per
 attempt until memory runs out.
 
-**Everything is in memory.** Characters are lost on restart. The `db` container
-(Postgres) is up but unused.
-
-**Sessions are not validated.** Any client is accepted as any player.
+**There are no accounts.** Characters are stored in Postgres and survive a
+restart, but nothing above them is: the login believes whatever identifier the
+client offers, so sessions are not validated and any client is accepted as any
+player.
 
 **Ship, sector and item data do not exist.** Unlike the avatar pieces — whose
 names could be recovered from the client's meshes — stats such as armour or

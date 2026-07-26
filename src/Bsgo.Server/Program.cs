@@ -1,4 +1,5 @@
 using Bsgo.Server;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -6,7 +7,7 @@ using Microsoft.Extensions.Logging;
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.Configure<ServerOptions>(builder.Configuration.GetSection(ServerOptions.SectionName));
-builder.Services.AddBsgoServer();
+builder.Services.AddBsgoServer(builder.Configuration.GetConnectionString("Bsgo"));
 
 builder.Logging.AddSimpleConsole(o =>
 {

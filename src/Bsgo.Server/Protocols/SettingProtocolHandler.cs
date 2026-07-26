@@ -23,26 +23,26 @@ public sealed class SettingProtocolHandler(
     public Task HandleAsync(BgoConnection connection, ushort messageType, ReadOnlyMemory<byte> payload, CancellationToken ct)
         => (SettingRequest)messageType switch
         {
-            SettingRequest.SaveSettings => SaveAsync(connection, payload, isKeys: false),
-            SettingRequest.SaveKeys => SaveAsync(connection, payload, isKeys: true),
+            SettingRequest.SaveSettings => SaveAsync(connection, payload, isKeys: false, ct),
+            SettingRequest.SaveKeys => SaveAsync(connection, payload, isKeys: true, ct),
             SettingRequest.SetSyfyShip => Task.CompletedTask,
             SettingRequest.SetFullScreen => Task.CompletedTask,
             _ => ProtocolLog.Unhandled<SettingRequest>(logger, connection, messageType),
         };
 
-    private Task SaveAsync(BgoConnection connection, ReadOnlyMemory<byte> payload, bool isKeys)
+    private async Task SaveAsync(
+        BgoConnection connection, ReadOnlyMemory<byte> payload, bool isKeys, CancellationToken ct)
     {
-        var player = store.GetOrCreate(connection.State.PlayerId);
+        var player = await store.GetOrCreateAsync(connection.State.PlayerId, ct);
         if (isKeys)
             player.KeyBindings = payload.ToArray();
         else
             player.Settings = payload.ToArray();
-        store.Save(player);
+        await store.SaveAsync(player, ct);
 
         logger.LogDebug(
             "Stored {Bytes} bytes of {What} for player {PlayerId}",
             payload.Length, isKeys ? "key bindings" : "settings", player.Id);
-        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -50,10 +50,8 @@ public sealed class SettingProtocolHandler(
     /// configuration; if nothing is stored, nothing is sent and the client
     /// falls back to its defaults.
     /// </summary>
-    public async Task OnPlayerEnteredAsync(BgoConnection connection, CancellationToken ct)
+    public async Task OnPlayerEnteredAsync(BgoConnection connection, PlayerRecord player, CancellationToken ct)
     {
-        var player = store.GetOrCreate(connection.State.PlayerId);
-
         if (player.Settings.Length > 0)
         {
             var w = new BgoWriter(player.Settings.Length);

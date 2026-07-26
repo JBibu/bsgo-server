@@ -23,6 +23,31 @@ ENUM_RE = re.compile(
 # One member: `Name = 12,` or `Name,`
 MEMBER_RE = re.compile(r"^\s*(?P<name>[A-Za-z_]\w*)\s*(?:=\s*(?P<value>-?\w+))?\s*,?\s*$")
 
+# The same, with the `: type` optional. The enums below are declared without
+# one, and a second pattern keeps that from loosening what the protocol classes
+# match.
+BARE_ENUM_RE = re.compile(
+    r"public\s+enum\s+(?P<name>\w+)\s*(?::\s*(?P<base>\w+)\s*)?\{(?P<body>[^}]*)\}",
+    re.DOTALL,
+)
+
+# Enums that are not part of any one protocol but travel inside messages of
+# several, each in a file of its own.
+#
+# The width is ours to state, because the client's declaration does not carry
+# it: every one of these is a plain `enum` (so int in C#) and what actually goes
+# on the wire is decided by how the client reads it back — `ReadByte` for most,
+# `ReadUInt16` for the card view. Get it wrong and every field after it shifts.
+SHARED_ENUMS = {
+    "Faction": "byte",           # PlayerProtocol: (Faction)br.ReadByte()
+    "CardView": "ushort",        # CatalogueProtocol: (CardView)br.ReadUInt16()
+    "GameLocation": "byte",      # SceneProtocol: (GameLocation)br.ReadByte()
+    "TransSceneType": "byte",    # SceneProtocol, alongside the location
+    "LoginError": "byte",        # LoginProtocol: (LoginError)br.ReadByte()
+    "ConnectType": "byte",       # LoginProtocol: written as w.Write((byte)...)
+    "AvatarItem": "byte",        # AvatarItems: items[(AvatarItem)r.ReadByte()]
+}
+
 
 def parse_enum_members(body: str) -> dict[str, int]:
     """Resolves C# enum values, including implicit auto-increment."""
@@ -50,14 +75,15 @@ def parse_enum_members(body: str) -> dict[str, int]:
     return members
 
 
-def enums_in(path: Path) -> dict[str, dict]:
+def enums_in(path: Path, pattern: re.Pattern[str] = ENUM_RE) -> dict[str, dict]:
+    """Every enum in a file. The pattern decides which shapes count."""
     src = path.read_text(encoding="utf-8", errors="replace")
     return {
         m.group("name"): {
             "base": m.group("base"),
             "members": parse_enum_members(m.group("body")),
         }
-        for m in ENUM_RE.finditer(src)
+        for m in pattern.finditer(src)
     }
 
 
@@ -98,6 +124,25 @@ def main() -> int:
     # 3. Protocols declared in ProtocolID but with no class of their own.
     missing = sorted(set(protocol_ids) - set(protocols))
 
+    # 4. Enums shared across protocols, each in its own file.
+    shared: dict[str, dict] = {}
+    for name, wire_type in sorted(SHARED_ENUMS.items()):
+        path = src_dir / f"{name}.cs"
+        if not path.exists():
+            print(f"ERROR: {path} not found", file=sys.stderr)
+            return 1
+
+        found = enums_in(path, BARE_ENUM_RE)
+        if name not in found:
+            print(f"ERROR: enum {name} not found in {path.name}", file=sys.stderr)
+            return 1
+
+        shared[name] = {
+            "source": path.name,
+            "wire_type": wire_type,
+            "members": found[name]["members"],
+        }
+
     spec = {
         "_note": (
             "Interface specification derived from the BSGO client for "
@@ -106,6 +151,7 @@ def main() -> int:
         "protocol_ids": protocol_ids,
         "protocols": protocols,
         "protocols_without_client_class": missing,
+        "shared_enums": shared,
     }
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -118,6 +164,8 @@ def main() -> int:
     print(f"  with a client class     : {len(protocols)}")
     print(f"  requests (C->S)         : {total_req}")
     print(f"  replies  (S->C)         : {total_rep}")
+    print(f"  shared enums            : {len(shared)}"
+          f" ({sum(len(e['members']) for e in shared.values())} members)")
     if missing:
         print(f"  without a client class  : {', '.join(missing)}")
     return 0

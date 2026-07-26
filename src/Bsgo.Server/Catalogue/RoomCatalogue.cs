@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Bsgo.Protocol;
-using Bsgo.Server.Players;
 
 namespace Bsgo.Server.Catalogue;
 

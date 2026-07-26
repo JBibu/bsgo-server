@@ -66,8 +66,9 @@ public sealed class LoginProtocolHandler(
             "Login: id={PlayerId} name={PlayerName} type={ConnectType}",
             playerId, playerName, connectType);
 
-        // TODO: validate sessionCode against the account once persistence
-        // exists. Until then the server accepts any session (development mode).
+        // TODO: validate sessionCode against the account. Characters persist,
+        // but there is nothing above them yet — no accounts to check a session
+        // against — so the server takes any session (development mode).
         if (!_options.AllowAnyCredentials && string.IsNullOrEmpty(sessionCode))
         {
             await SendErrorAsync(connection, LoginError.WrongSession, ct);
@@ -79,7 +80,7 @@ public sealed class LoginProtocolHandler(
         // would make every player share the same character.
         if (playerId == 0)
         {
-            playerId = store.AllocatePlayerId();
+            playerId = await store.AllocatePlayerIdAsync(ct);
             logger.LogInformation(
                 "Client arrived without an identifier; assigning {PlayerId}", playerId);
         }
@@ -91,8 +92,9 @@ public sealed class LoginProtocolHandler(
 
         // Everything the client expects to find waiting for it without asking:
         // its identifier, the avatar catalogue, the saved settings.
+        var player = await store.GetOrCreateAsync(playerId, ct);
         foreach (var hook in _enteredHooks)
-            await hook.OnPlayerEnteredAsync(connection, ct);
+            await hook.OnPlayerEnteredAsync(connection, player, ct);
     }
 
     /// <summary>
@@ -127,24 +129,3 @@ public sealed class LoginProtocolHandler(
 
 }
 
-/// <summary>Login rejection reason, as the client interprets it.</summary>
-public enum LoginError : byte
-{
-    Unknown = 0,
-    AlreadyConnected = 1,
-    WrongProtocol = 2,
-    WrongSession = 3,
-    WrongUserId = 4,
-    WrongPlayerId = 5,
-    WrongPlayerName = 6,
-}
-
-/// <summary>How the client identifies itself on connect.</summary>
-public enum ConnectType : byte
-{
-    Web = 0,
-    DebugPlayerId = 1,
-    DebugName = 2,
-    DebugNew = 3,
-    DebugResetByPlayerId = 4,
-}

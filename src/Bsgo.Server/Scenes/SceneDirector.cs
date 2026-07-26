@@ -1,46 +1,11 @@
 using Bsgo.Protocol;
+using Bsgo.Server.Catalogue;
 using Bsgo.Server.Net;
+using Bsgo.Server.Players;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Bsgo.Server.Scenes;
-
-/// <summary>Destination of a scene transition.</summary>
-public enum GameLocation : byte
-{
-    Unknown = 0,
-    Space = 1,
-    Room = 2,
-    Story = 3,
-    Disconnect = 4,
-    Arena = 5,
-    BattleSpace = 6,
-    Tournament = 7,
-    Tutorial = 8,
-    Teaser = 9,
-    Avatar = 10,
-    Starter = 11,
-    Zone = 12,
-}
-
-/// <summary>Animation the client uses when entering the scene.</summary>
-public enum TransSceneType : byte
-{
-    None = 0,
-    Die = 1,
-    Undock = 2,
-    Ftl = 3,
-    Hangar = 4,
-    CIC = 5,
-    Recroom = 6,
-    Outpost = 7,
-    Minigfacility = 8,
-    FirstStory = 9,
-    Dock = 10,
-    Arena = 11,
-    Teaser = 12,
-    Battlespace = 13,
-    Tournament = 14,
-}
 
 /// <summary>
 /// Decides and sends which scene each client goes to.
@@ -55,8 +20,74 @@ public enum TransSceneType : byte
 /// belonging to that destination: sending another's desynchronises it.
 /// </para>
 /// </remarks>
-public sealed class SceneDirector(ILogger<SceneDirector> logger)
+public sealed class SceneDirector(
+    RoomCatalogue rooms,
+    IOptions<ServerOptions> options,
+    ILogger<SceneDirector> logger)
 {
+    /// <summary>
+    /// Sends the player wherever their character stands: into the game if they
+    /// have one, to character creation if they do not.
+    /// </summary>
+    /// <remarks>
+    /// Asked on login, when the client has left the login screen and is waiting
+    /// to be told what to load. It waits indefinitely, so this must always end
+    /// in a transition — including when the answer is unsatisfying.
+    /// </remarks>
+    public async Task SendAfterLoginAsync(BgoConnection connection, PlayerRecord player, CancellationToken ct)
+    {
+        if (player.IsCreated)
+        {
+            if (await TrySendIntoTheGameAsync(connection, player, ct))
+                return;
+
+            // Their character exists and there is still nowhere to put it. They
+            // get the creation screen again, which at least does something,
+            // rather than the "Please wait" they would sit on forever.
+            logger.LogWarning(
+                "Player {PlayerId} has a character but no playable destination; "
+                + "sending them back to character creation",
+                player.Id);
+        }
+
+        await SendToFactionSelectionAsync(connection, ct);
+    }
+
+    /// <summary>
+    /// Sends the player into their faction's room, if they can go there at all.
+    /// </summary>
+    /// <returns>Whether a transition was sent.</returns>
+    /// <remarks>
+    /// The caller has to know: leaving the client without a destination is not
+    /// an error it can see, it just stops.
+    /// </remarks>
+    public async Task<bool> TrySendIntoTheGameAsync(
+        BgoConnection connection, PlayerRecord player, CancellationToken ct)
+    {
+        // Deliberately shut: the hangar window reaches for the player's active
+        // ship, and there are none. Being null it throws inside the client's
+        // Update, which retries every frame and instantiates the scenery once
+        // per attempt until it runs out of memory.
+        if (!options.Value.EnableRoomEntry)
+        {
+            logger.LogWarning(
+                "Room entry disabled: player {PlayerId} stays out of the game. "
+                + "They need a ship before the hangar can be entered.",
+                player.Id);
+            return false;
+        }
+
+        var room = rooms.ForFaction(player.Faction);
+        if (room is null)
+        {
+            logger.LogError("No room defined for faction {Faction}", player.Faction);
+            return false;
+        }
+
+        await SendToRoomAsync(connection, room.CardGuid, room.SectorId, ct);
+        return true;
+    }
+
     /// <summary>Faction selection screen (new character).</summary>
     public Task SendToFactionSelectionAsync(BgoConnection connection, CancellationToken ct) =>
         SendAsync(connection, GameLocation.Starter, ct, w =>

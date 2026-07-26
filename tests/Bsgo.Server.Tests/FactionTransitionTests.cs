@@ -1,9 +1,6 @@
 using Bsgo.Protocol;
 using Bsgo.Server.Players;
-using Bsgo.Server.Protocols;
-using Bsgo.Server.Scenes;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace Bsgo.Server.Tests;
 
@@ -14,7 +11,7 @@ namespace Bsgo.Server.Tests;
 /// </summary>
 public class FactionTransitionTests
 {
-    private static BgoWriter Faction(Faction faction)
+    private static BgoWriter FactionPayload(Faction faction)
     {
         var w = new BgoWriter(1);
         w.Write((byte)faction);
@@ -28,11 +25,11 @@ public class FactionTransitionTests
         using var client = await server.ConnectAsync();
         await client.ReadAsync();   // Hello
 
-        await client.SendAsync(ProtocolId.Player, (ushort)PlayerRequest.SelectFaction, Faction(Players.Faction.Cylon));
+        await client.SendAsync(ProtocolId.Player, (ushort)PlayerRequest.SelectFaction, FactionPayload(Faction.Cylon));
 
         // Confirms which side they are on...
         var faction = await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.Faction);
-        Assert.Equal((byte)Players.Faction.Cylon, new BgoReader(faction.Payload).ReadByte());
+        Assert.Equal((byte)Faction.Cylon, new BgoReader(faction.Payload).ReadByte());
 
         // ...and where they go: without this the client sits on "Please wait".
         var scene = await client.ReadUntilAsync(ProtocolId.Scene, (ushort)SceneReply.LoadNextScene);
@@ -46,17 +43,53 @@ public class FactionTransitionTests
     }
 
     [Fact]
+    public async Task The_avatar_arrives_before_the_faction()
+    {
+        // Reading the faction makes the client inspect the appearance it holds,
+        // to fall back to a default look when there is none. A character who has
+        // never sent one has that field null, the read throws, and the client
+        // swallows the exception: the faction never reaches the rest of the UI.
+        await using var server = await TestServer.StartAsync();
+        using var client = await server.ConnectAsync();
+        await client.ReadAsync();   // Hello
+
+        await client.SendAsync(ProtocolId.Player, (ushort)PlayerRequest.SelectFaction, FactionPayload(Faction.Cylon));
+
+        // Collected up to the scene transition, which closes the exchange, so
+        // that a wrong order fails here instead of hanging on a read.
+        var replies = new List<(ushort Type, byte[] Payload)>();
+        while (true)
+        {
+            var message = await client.ReadAsync();
+            if (message.Protocol == ProtocolId.Scene) break;
+            if (message.Protocol == ProtocolId.Player) replies.Add((message.Type, message.Payload));
+        }
+
+        var order = replies.ConvertAll(m => (PlayerReply)m.Type);
+        Assert.True(
+            order.IndexOf(PlayerReply.Avatar) < order.IndexOf(PlayerReply.Faction),
+            $"the avatar must precede the faction, got: {string.Join(", ", order)}");
+
+        // Empty, and it still has to be sent: the client fills in its own
+        // default from there.
+        var r = new BgoReader(replies.Find(m => m.Type == (ushort)PlayerReply.Avatar).Payload);
+        Assert.Equal(0, r.ReadLength());    // no pieces
+        Assert.Equal(0, r.ReadLength());    // empty extra block
+        Assert.Equal(0, r.Remaining);
+    }
+
+    [Fact]
     public async Task The_chosen_faction_is_recorded()
     {
         await using var server = await TestServer.StartAsync();
         using var client = await server.ConnectAsync();
         await client.ReadAsync();
 
-        await client.SendAsync(ProtocolId.Player, (ushort)PlayerRequest.SelectFaction, Faction(Players.Faction.Colonial));
+        await client.SendAsync(ProtocolId.Player, (ushort)PlayerRequest.SelectFaction, FactionPayload(Faction.Colonial));
         await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.Faction);
 
         var store = server.Services.GetRequiredService<IPlayerStore>();
-        Assert.Equal(Players.Faction.Colonial, store.GetOrCreate(0).Faction);
+        Assert.Equal(Faction.Colonial, (await store.GetOrCreateAsync(0)).Faction);
     }
 
     [Fact]
@@ -69,7 +102,7 @@ public class FactionTransitionTests
         using var client = await server.ConnectAsync();
         await client.ReadAsync();
 
-        await client.SendAsync(ProtocolId.Player, (ushort)PlayerRequest.SelectFaction, Faction(Players.Faction.Cylon));
+        await client.SendAsync(ProtocolId.Player, (ushort)PlayerRequest.SelectFaction, FactionPayload(Faction.Cylon));
         await client.ReadUntilAsync(ProtocolId.Scene, (ushort)SceneReply.LoadNextScene);
 
         var avatar = new AvatarDescription
@@ -97,7 +130,7 @@ public class FactionTransitionTests
         using var client = await server.ConnectAsync();
         await client.ReadAsync();
 
-        await client.SendAsync(ProtocolId.Player, (ushort)PlayerRequest.SelectFaction, Faction(Players.Faction.Cylon));
+        await client.SendAsync(ProtocolId.Player, (ushort)PlayerRequest.SelectFaction, FactionPayload(Faction.Cylon));
         await client.ReadUntilAsync(ProtocolId.Scene, (ushort)SceneReply.LoadNextScene);
 
         var avatar = new AvatarDescription

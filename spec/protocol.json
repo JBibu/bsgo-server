@@ -743,5 +743,154 @@
     "Market",
     "Ship",
     "Tournament"
-  ]
+  ],
+  "shared_enums": {
+    "AvatarItem": {
+      "source": "AvatarItem.cs",
+      "wire_type": "byte",
+      "members": {
+        "Race": 0,
+        "Sex": 1,
+        "HumanHead": 2,
+        "HumanFace": 3,
+        "HumanHands": 4,
+        "HumanGlasses": 5,
+        "HumanHelmet": 6,
+        "HumanHair": 7,
+        "HumanHairColor": 8,
+        "HumanSuit": 9,
+        "HumanBeard": 10,
+        "HumanBeardColor": 11,
+        "CylonHead": 12,
+        "CylonHeadSkin": 13,
+        "CylonArms": 14,
+        "CylonArmsSkin": 15,
+        "CylonBody": 16,
+        "CylonBodySkin": 17,
+        "CylonLegs": 18,
+        "CylonLegsSkin": 19
+      }
+    },
+    "CardView": {
+      "source": "CardView.cs",
+      "wire_type": "ushort",
+      "members": {
+        "GUI": 1,
+        "ShipSystem": 2,
+        "ShipConsumable": 3,
+        "World": 4,
+        "Global": 5,
+        "ShipAbility": 6,
+        "Counter": 7,
+        "Skill": 8,
+        "Ship": 10,
+        "Sector": 11,
+        "Starter": 13,
+        "Room": 14,
+        "Mission": 16,
+        "Reward": 18,
+        "Title": 19,
+        "Duty": 20,
+        "AvatarCatalogue": 21,
+        "Module": 22,
+        "Price": 23,
+        "Missile": 24,
+        "ShipList": 25,
+        "StickerList": 26,
+        "Movement": 28,
+        "Owner": 29,
+        "GalaxyMap": 30,
+        "Camera": 31,
+        "MailTemplate": 32,
+        "StarterKit": 34,
+        "ShipPaint": 35,
+        "Regulation": 36,
+        "ShipSale": 37,
+        "SectorEvent": 38,
+        "Tournament": 39,
+        "MapPart": 40,
+        "MapPartSet": 41,
+        "ShipLight": 42,
+        "EventShop": 43,
+        "GlobalBonusEvent": 44,
+        "Banner": 45,
+        "ConversionCampaign": 46,
+        "Zone": 47
+      }
+    },
+    "ConnectType": {
+      "source": "ConnectType.cs",
+      "wire_type": "byte",
+      "members": {
+        "Web": 0,
+        "DebugPlayerId": 1,
+        "DebugName": 2,
+        "DebugNew": 3,
+        "DebugResetByPlayerId": 4
+      }
+    },
+    "Faction": {
+      "source": "Faction.cs",
+      "wire_type": "byte",
+      "members": {
+        "Neutral": 0,
+        "Colonial": 1,
+        "Cylon": 2,
+        "Ancient": 3
+      }
+    },
+    "GameLocation": {
+      "source": "GameLocation.cs",
+      "wire_type": "byte",
+      "members": {
+        "Unknown": 0,
+        "Space": 1,
+        "Room": 2,
+        "Story": 3,
+        "Disconnect": 4,
+        "Arena": 5,
+        "BattleSpace": 6,
+        "Tournament": 7,
+        "Tutorial": 8,
+        "Teaser": 9,
+        "Avatar": 10,
+        "Starter": 11,
+        "Zone": 12
+      }
+    },
+    "LoginError": {
+      "source": "LoginError.cs",
+      "wire_type": "byte",
+      "members": {
+        "Unknown": 0,
+        "AlreadyConnected": 1,
+        "WrongProtocol": 2,
+        "WrongSession": 3,
+        "WrongUserId": 4,
+        "WrongPlayerId": 5,
+        "WrongPlayerName": 6
+      }
+    },
+    "TransSceneType": {
+      "source": "TransSceneType.cs",
+      "wire_type": "byte",
+      "members": {
+        "None": 0,
+        "Die": 1,
+        "Undock": 2,
+        "Ftl": 3,
+        "Hangar": 4,
+        "CIC": 5,
+        "Recroom": 6,
+        "Outpost": 7,
+        "Minigfacility": 8,
+        "FirstStory": 9,
+        "Dock": 10,
+        "Arena": 11,
+        "Teaser": 12,
+        "Battlespace": 13,
+        "Tournament": 14
+      }
+    }
+  }
 }

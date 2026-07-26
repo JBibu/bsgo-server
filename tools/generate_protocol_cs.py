@@ -64,6 +64,22 @@ def main() -> int:
         encoding="utf-8",
     )
 
+    # --- Enums shared across protocols -----------------------------------
+    shared = spec.get("shared_enums", {})
+    if shared:
+        blocks = [
+            render_enum(
+                name,
+                enum["wire_type"],
+                enum["members"],
+                f"Shared with the client ({enum['source']}), "
+                f"travels as {enum['wire_type']}.",
+            )
+            for name, enum in sorted(shared.items())
+        ]
+        (out_dir / "Shared.g.cs").write_text(
+            HEADER + "\n" + "\n\n".join(blocks) + "\n", encoding="utf-8")
+
     # --- One file per protocol with its Request / Reply ------------------
     generated = 0
     for short, proto in sorted(spec["protocols"].items()):

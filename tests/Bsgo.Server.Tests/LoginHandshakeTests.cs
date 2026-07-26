@@ -1,9 +1,7 @@
 using Bsgo.Protocol;
 using Bsgo.Server.Catalogue;
 using Bsgo.Server.Players;
-using Bsgo.Server.Protocols;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace Bsgo.Server.Tests;
 
@@ -22,15 +20,8 @@ public class LoginHandshakeTests
             o.AllowAnyCredentials = true;
         });
 
-    private static BgoWriter Credentials(uint playerId, string name = "Starbuck")
-    {
-        var w = new BgoWriter();
-        w.Write((byte)ConnectType.Web);
-        w.Write(playerId);
-        w.Write(name);
-        w.Write("c7faac2379e35f6404eced5f484210ba");
-        return w;
-    }
+    private static BgoWriter Credentials(uint playerId, string name = "Starbuck") =>
+        TestClient.Credentials(playerId, name);
 
     [Fact]
     public async Task The_server_greets_on_connect()
@@ -208,6 +199,6 @@ public class LoginHandshakeTests
         await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.ID);
 
         var store = server.Services.GetRequiredService<IPlayerStore>();
-        Assert.Equal(5085935u, store.GetOrCreate(5085935).Id);
+        Assert.Equal(5085935u, (await store.GetOrCreateAsync(5085935)).Id);
     }
 }
