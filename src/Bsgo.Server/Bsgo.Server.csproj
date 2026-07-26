@@ -18,6 +18,7 @@
     <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../data/avatar-catalogue.json" Link="data/avatar-catalogue.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../data/rooms.json" Link="data/rooms.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../data/ships.json" Link="data/ships.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
