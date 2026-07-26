@@ -37,14 +37,10 @@ public sealed class ServerOptions
     /// Send the player into the room once character creation finishes.
     /// </summary>
     /// <remarks>
-    /// Deliberately off: the hangar window reaches for the player's active
-    /// ship, and there are no ships yet. Being null, it throws while building
-    /// the UI, and because the failure happens inside the client's
-    /// <c>Update</c>, it retries every frame and instantiates the scenery once
-    /// per attempt, until memory runs out and it closes.
-    /// <para>
-    /// Turn on once the player receives a ship (Ship and ShipList cards).
-    /// </para>
+    /// Was off while players had no ship: the hangar window reaches for the
+    /// active one and, finding null, threw inside the client's <c>Update</c> —
+    /// once per frame, instantiating the scenery each time, until memory ran
+    /// out. Players now get one, so it is on.
     /// </remarks>
-    public bool EnableRoomEntry { get; set; } = false;
+    public bool EnableRoomEntry { get; set; } = true;
 }

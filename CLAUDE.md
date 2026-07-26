@@ -39,10 +39,10 @@ exception — `bsgo_Data/output_log.txt` inside the Wine prefix.
   `KeyNotFoundException` inside the client.
 - **Payload field order is the whole contract.** There are no tags: one field
   too many or too few shifts everything after it.
-- **`ServerOptions.EnableRoomEntry` is still off, and turning it on has not been
-  tried against the client.** Players now get a ship, which is what the hangar
-  window was missing, but nothing has confirmed the ship cards are read the way
-  the client expects. Flip it, run the client, read its log.
+- **Room entry is on but unproven against the client.** If the hangar loads
+  forever, or the client dies instantiating the scenery in a loop, the ship
+  cards are the first place to look — a field out of place there reports
+  nothing.
 
 ## Layout
 
