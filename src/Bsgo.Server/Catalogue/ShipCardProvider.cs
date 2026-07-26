@@ -19,7 +19,7 @@ public sealed class ShipCardProvider(ShipCatalogue catalogue) : ICardProvider
     /// </summary>
     /// <remarks>
     /// The table's names are the client's own, lower cased and with underscores;
-    /// most map by that rule alone and are resolved by <see cref="Enum.TryParse"/>.
+    /// most map by that rule alone and are resolved by <c>Enum.TryParse</c>.
     /// These are the ones where the client's name differs.
     /// </remarks>
     private static readonly Dictionary<string, ObjectStat> Renamed = new()
@@ -34,6 +34,9 @@ public sealed class ShipCardProvider(ShipCatalogue catalogue) : ICardProvider
         ["inertial_compensation"] = ObjectStat.InertiaCompensation,
     };
 
+    /// <summary>How big the client considers a ship, for targeting and camera.</summary>
+    private const float ShipRadius = 10f;
+
     public bool TryWriteCard(uint cardGuid, CardView view, BgoWriter w)
     {
         if (view is not (CardView.Ship or CardView.World or CardView.GUI or CardView.Price))
@@ -42,7 +45,7 @@ public sealed class ShipCardProvider(ShipCatalogue catalogue) : ICardProvider
 
         switch (view)
         {
-            case CardView.Ship: WriteShip(ship, w); break;
+            case CardView.Ship: WriteShip(cardGuid, ship, w); break;
             case CardView.World: WriteWorld(ship, w); break;
             case CardView.GUI: WriteGui(ship, w); break;
             default: WritePrice(w); break;
@@ -60,9 +63,9 @@ public sealed class ShipCardProvider(ShipCatalogue catalogue) : ICardProvider
         return Enum.TryParse<ObjectStat>(camel, out var stat) ? stat : null;
     }
 
-    private static void WriteShip(ShipDefinition ship, BgoWriter w)
+    private static void WriteShip(uint cardGuid, ShipDefinition ship, BgoWriter w)
     {
-        w.Write(ship.CardGuid);          // object key: the ship's own world object
+        w.Write(cardGuid);               // object key: the ship's own world object
         w.Write((byte)1);                // level
         w.Write((byte)1);                // max level: no upgrade path yet
         w.Write((byte)(ship.Level ?? 1));
@@ -137,19 +140,8 @@ public sealed class ShipCardProvider(ShipCatalogue catalogue) : ICardProvider
         }
     }
 
-    private static void WriteWorld(ShipDefinition ship, BgoWriter w)
-    {
-        w.Write(ship.Prefab);
-        w.Write((byte)1);        // levels of detail
-        w.Write(10f);            // radius
-        w.WriteLength(0);        // attachment spots
-        w.Write(string.Empty);   // system map texture
-        w.Write((sbyte)-1);
-        w.Write((sbyte)0);
-        w.Write(true);           // a ship can be targeted
-        w.Write(true);
-        w.Write(false);
-    }
+    private static void WriteWorld(ShipDefinition ship, BgoWriter w) =>
+        WorldCard.Write(w, ship.Prefab, ShipRadius, targetable: true);
 
     private static void WriteGui(ShipDefinition ship, BgoWriter w)
     {

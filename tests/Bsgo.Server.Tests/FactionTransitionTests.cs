@@ -93,11 +93,11 @@ public class FactionTransitionTests
     }
 
     [Fact]
-    public async Task Creating_the_character_grants_a_ship_but_stops_short_of_the_room()
+    public async Task Creating_the_character_stops_short_of_the_room_when_it_is_shut()
     {
-        // The ship is what the room needs, so it is handed over as soon as the
-        // character is finished — but with room entry shut the player is left
-        // where they are rather than sent anywhere.
+        // The ship comes with entering the room, which is the only thing that
+        // needs one. With the room shut there is no ship either, and the player
+        // stays on the screen they are already looking at.
         await using var server = await TestServer.StartAsync(o => o.EnableRoomEntry = false);
         using var client = await server.ConnectAsync();
         await client.ReadAsync();
@@ -119,16 +119,7 @@ public class FactionTransitionTests
 
         await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.Avatar);
 
-        // The ship arrives...
-        var add = await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.AddShip);
-        var r = new BgoReader(add.Payload);
-        Assert.Equal(Hangar.ShipId, r.ReadUInt16());
-        Assert.NotEqual(0u, r.ReadUInt32());   // the card the client will fetch
-
-        await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.ActiveShip);
-        await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.Slots);
-
-        // ...and nothing else: no scene transition.
+        // Nothing follows it: no ship, and no scene transition.
         await Task.Delay(200);
         Assert.Equal(0, client.Available);
     }
@@ -150,6 +141,13 @@ public class FactionTransitionTests
         var payload = new BgoWriter();
         avatar.Write(payload);
         await client.SendAsync(ProtocolId.Player, (ushort)PlayerRequest.CreateAvatar, payload);
+
+        // The ship arrives with the room, and before it: the client resolves the
+        // card while the scene loads.
+        var add = await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.AddShip);
+        var ship = new BgoReader(add.Payload);
+        Assert.Equal(Hangar.ShipId, ship.ReadUInt16());
+        Assert.NotEqual(0u, ship.ReadUInt32());
 
         var scene = await client.ReadUntilAsync(ProtocolId.Scene, (ushort)SceneReply.LoadNextScene);
         var r = new BgoReader(scene.Payload);

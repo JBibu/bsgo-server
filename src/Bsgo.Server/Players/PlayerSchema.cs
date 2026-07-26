@@ -12,12 +12,17 @@ namespace Bsgo.Server.Players;
 /// connect to a server whose schema does not exist yet. Every statement is
 /// written to be safe to re-run: the server applies this on every start.
 /// <para>
-/// This creates what is missing; it does not change what is there. Against a
-/// database that already holds the table, adding a column here does nothing at
-/// all — no error, and the server then reads a column that is not present.
-/// Accounts, the next thing the project needs, most likely means a new column
-/// on <c>players</c> rather than a new table, and that is the point at which
-/// this file stops being enough and wants versioned migrations.
+/// This creates what is missing; it does not change what is there. A column
+/// added to an existing table has to say so itself, in the <c>alter table</c>
+/// block below — <c>create table if not exists</c> does nothing at all to a
+/// table that is already there, with no error to show for it.
+/// </para>
+/// <para>
+/// That block is the whole migration story, and it is one statement long. Every
+/// column added this way costs an edit in four places: the create list, the
+/// alter block, <c>PostgresPlayerStore.Columns</c>, and the insert. That is
+/// affordable for one. When the second or third arrives — accounts will bring
+/// some — this is where a versioned migration mechanism belongs instead.
 /// </para>
 /// </remarks>
 public sealed class PlayerSchema(

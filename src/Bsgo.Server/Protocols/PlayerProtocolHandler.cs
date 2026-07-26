@@ -12,7 +12,6 @@ namespace Bsgo.Server.Protocols;
 /// </summary>
 public sealed class PlayerProtocolHandler(
     IPlayerStore store,
-    Hangar hangar,
     SceneDirector scenes,
     ILogger<PlayerProtocolHandler> logger) : IProtocolHandler, IPlayerEnteredHook
 {
@@ -120,12 +119,7 @@ public sealed class PlayerProtocolHandler(
 
         await SendAvatarAsync(connection, avatar, ct);
 
-        // The character is finished: it gets its ship before being sent
-        // anywhere, because the room is what needs one.
-        if (await hangar.EnsureShipAsync(player, ct) is not null)
-            await hangar.SendAsync(connection, player, ct);
-
-        // And this is where they walk into the game.
+        // The character is finished, so this is where they walk into the game.
         // If they cannot yet, they stay on the creation screen they are already
         // looking at — which is a scene, so nothing hangs.
         await scenes.TrySendIntoTheGameAsync(connection, player, ct);

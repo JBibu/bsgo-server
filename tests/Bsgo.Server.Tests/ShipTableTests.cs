@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Xunit;
 
 namespace Bsgo.Server.Tests;
 

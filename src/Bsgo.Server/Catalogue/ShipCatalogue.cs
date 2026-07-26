@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Bsgo.Protocol;
-using Bsgo.Server.Players;
 
 namespace Bsgo.Server.Catalogue;
 
@@ -35,6 +34,9 @@ public sealed class ShipDefinition
     [JsonPropertyName("role")] public string Role { get; set; } = string.Empty;
     [JsonPropertyName("level")] public int? Level { get; set; }
     [JsonPropertyName("counterpart")] public string Counterpart { get; set; } = string.Empty;
+
+    /// <summary>Whether a new character of this faction is given this ship.</summary>
+    [JsonPropertyName("starter")] public bool Starter { get; set; }
 
     /// <summary>
     /// Client prefab of the 3D model, without the <c>.prefab</c> extension.
@@ -116,15 +118,13 @@ public sealed class ShipCatalogue
 
     /// <summary>The ship a new character of this faction is given.</summary>
     /// <remarks>
-    /// The two the game itself started players with. Without one the hangar
-    /// window has no active ship to read and takes the client down with it.
+    /// Marked in the table rather than named here, the way rooms are: which ship
+    /// a faction starts with is game content, and naming it in code makes a
+    /// rename in the table silently leave new players with nothing — which the
+    /// hangar window cannot survive.
     /// </remarks>
-    public ShipDefinition? StarterFor(Faction faction) => faction switch
-    {
-        Faction.Colonial => Find("Viper Mark II"),
-        Faction.Cylon => Find("Cylon Raider"),
-        _ => null,
-    };
+    public ShipDefinition? StarterFor(Faction faction) =>
+        Ships.FirstOrDefault(s => s.Starter && s.Faction == faction);
 
     public static ShipCatalogue LoadFrom(string path)
     {

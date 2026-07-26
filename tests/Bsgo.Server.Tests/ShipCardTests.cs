@@ -1,7 +1,5 @@
 using Bsgo.Protocol;
 using Bsgo.Server.Catalogue;
-using Bsgo.Server.Players;
-using Xunit;
 
 namespace Bsgo.Server.Tests;
 
@@ -15,10 +13,9 @@ namespace Bsgo.Server.Tests;
 /// </remarks>
 public class ShipCardTests
 {
-    private static readonly ShipCatalogue Catalogue =
-        ShipCatalogue.LoadFrom(ServerServices.DataFile("ships.json"));
+    private static ShipCatalogue Catalogue => TestData.Ships;
 
-    private static readonly ShipCardProvider Provider = new(Catalogue);
+    private static readonly ShipCardProvider Provider = new(TestData.Ships);
 
     private static ShipDefinition Viper => Catalogue.Find("Viper Mark II")!;
 

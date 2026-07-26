@@ -24,6 +24,32 @@ public interface ICardProvider
     bool TryWriteCard(uint cardGuid, CardView view, BgoWriter w);
 }
 
+/// <summary>
+/// The <c>World</c> card: any object the client puts in a scene.
+/// </summary>
+/// <remarks>
+/// Rooms and ships both have one and the client reads them with the same ten
+/// fields in the same order. Written once because the format was recovered from
+/// the client rather than documented: the next field discovered has one place
+/// to go, not two that look alike.
+/// </remarks>
+public static class WorldCard
+{
+    public static void Write(BgoWriter w, string prefab, float radius, bool targetable)
+    {
+        w.Write(prefab);
+        w.Write((byte)1);        // levels of detail
+        w.Write(radius);
+        w.WriteLength(0);        // attachment spots
+        w.Write(string.Empty);   // system map texture
+        w.Write((sbyte)-1);      // no frame on the map
+        w.Write((sbyte)0);
+        w.Write(targetable);
+        w.Write(targetable);     // and bracketed in range on the same terms
+        w.Write(false);          // not forced onto the map
+    }
+}
+
 /// <summary>Serves the avatar catalogue, the card shown at character creation.</summary>
 /// <remarks>
 /// The body is serialised once and then copied. It is the largest message the

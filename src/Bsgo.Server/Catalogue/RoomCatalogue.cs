@@ -56,19 +56,8 @@ public sealed class RoomDefinition
     /// <summary>
     /// <c>World</c> card: the room's physical object in the world.
     /// </summary>
-    public void WriteWorldCard(BgoWriter w)
-    {
-        w.Write(PrefabName);
-        w.Write((byte)1);        // levels of detail
-        w.Write(Radius);
-        w.WriteLength(0);        // attachment spots
-        w.Write(string.Empty);   // system map texture
-        w.Write((sbyte)-1);      // no frame on the map
-        w.Write((sbyte)0);
-        w.Write(false);          // cannot be targeted
-        w.Write(false);
-        w.Write(false);
-    }
+    public void WriteWorldCard(BgoWriter w) =>
+        WorldCard.Write(w, PrefabName, Radius, targetable: false);
 }
 
 /// <summary>Available rooms, loaded from their data file.</summary>

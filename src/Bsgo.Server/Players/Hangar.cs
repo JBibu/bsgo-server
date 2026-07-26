@@ -1,7 +1,6 @@
 using Bsgo.Protocol;
 using Bsgo.Server.Catalogue;
 using Bsgo.Server.Net;
-using Bsgo.Server.Protocols;
 using Microsoft.Extensions.Logging;
 
 namespace Bsgo.Server.Players;

@@ -2,7 +2,6 @@ using Bsgo.Protocol;
 using Bsgo.Server.Catalogue;
 using Bsgo.Server.Players;
 using Microsoft.Extensions.Logging.Abstractions;
-using Xunit;
 
 namespace Bsgo.Server.Tests;
 
@@ -16,8 +15,7 @@ namespace Bsgo.Server.Tests;
 /// </remarks>
 public class HangarTests
 {
-    private static readonly ShipCatalogue Ships =
-        ShipCatalogue.LoadFrom(ServerServices.DataFile("ships.json"));
+    private static ShipCatalogue Ships => TestData.Ships;
 
     private static (Hangar Hangar, IPlayerStore Store) Fresh()
     {

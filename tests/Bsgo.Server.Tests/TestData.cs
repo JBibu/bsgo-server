@@ -18,6 +18,10 @@ public static class TestData
     private static readonly Lazy<RoomCatalogue> LazyRooms =
         new(() => RoomCatalogue.LoadFrom(ServerServices.DataFile("rooms.json")));
 
+    private static readonly Lazy<ShipCatalogue> LazyShips =
+        new(() => ShipCatalogue.LoadFrom(ServerServices.DataFile("ships.json")));
+
     public static AvatarCatalogue Avatars => LazyAvatars.Value;
     public static RoomCatalogue Rooms => LazyRooms.Value;
+    public static ShipCatalogue Ships => LazyShips.Value;
 }

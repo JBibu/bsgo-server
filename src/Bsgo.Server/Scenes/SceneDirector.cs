@@ -22,6 +22,7 @@ namespace Bsgo.Server.Scenes;
 /// </remarks>
 public sealed class SceneDirector(
     RoomCatalogue rooms,
+    Hangar hangar,
     IOptions<ServerOptions> options,
     ILogger<SceneDirector> logger)
 {
@@ -60,6 +61,13 @@ public sealed class SceneDirector(
     /// <remarks>
     /// The caller has to know: leaving the client without a destination is not
     /// an error it can see, it just stops.
+    /// <para>
+    /// The ship is guaranteed here rather than by whoever calls this, because
+    /// this is the only way into the room and the room is what needs one. A
+    /// player who arrives without an active ship puts the client in a
+    /// throw-per-frame loop, and a future caller that forgot the guarantee
+    /// would rediscover it the hard way.
+    /// </para>
     /// </remarks>
     public async Task<bool> TrySendIntoTheGameAsync(
         BgoConnection connection, PlayerRecord player, CancellationToken ct)
@@ -83,6 +91,15 @@ public sealed class SceneDirector(
             logger.LogError("No room defined for faction {Faction}", player.Faction);
             return false;
         }
+
+        if (await hangar.EnsureShipAsync(player, ct) is null)
+        {
+            logger.LogError(
+                "Player {PlayerId} has no ship and none can be given; the room would "
+                + "take the client down", player.Id);
+            return false;
+        }
+        await hangar.SendAsync(connection, player, ct);
 
         await SendToRoomAsync(connection, room.CardGuid, room.SectorId, ct);
         return true;
