@@ -22,9 +22,9 @@ analysis of the client.
 | Generated C# message enums | Generated from the spec |
 | Login handshake | Working end to end |
 | Character creation (faction, avatar, name) | Working against the real client |
-| Room entry | Disabled: needs ships (see below) |
+| Room entry | Disabled: untested with the client (see below) |
 | Persistence | Characters in Postgres; no accounts yet |
-| Ship stats | All 64 in `data/ships.json`; not wired to the server yet |
+| Ships | All 64 served as catalogue cards; players get their faction's starter |
 
 ## Layout
 
@@ -40,6 +40,7 @@ tools/
 data/
   avatar-catalogue.json avatar pieces (generated from the client's assets)
   rooms.json            playable rooms
+  ships.json            the 64 ships and their stats
 src/
   Bsgo.Protocol/        wire format, framing, generated enums
   Bsgo.Server/          TCP listener, sessions, protocol handlers
@@ -134,11 +135,11 @@ around it with a `C:\bsgo` link.
 
 ## Known limitations
 
-**Room entry is disabled** (`ServerOptions.EnableRoomEntry`). The hangar window
-reaches for the player's active ship, and ships are not implemented. Being null,
-it throws while building the UI, and since the failure happens inside the
-client's `Update`, it retries every frame and instantiates the scenery once per
-attempt until memory runs out.
+**Room entry is still disabled** (`ServerOptions.EnableRoomEntry`). It was shut
+because the hangar window reaches for the player's active ship and found none,
+throwing inside the client's `Update` — once per frame, instantiating the
+scenery each time, until memory ran out. Players now have a ship, so the reason
+is gone, but nobody has yet run the client with the flag on.
 
 **There are no accounts.** Characters are stored in Postgres and survive a
 restart, but nothing above them is: the login believes whatever identifier the

@@ -32,6 +32,7 @@ public sealed class PlayerSchema(
             avatar_description bytea       not null default '',
             settings           bytea       not null default '',
             key_bindings       bytea       not null default '',
+            ship_card_guid     bigint      not null default 0,
             created_at         timestamptz not null default now(),
             updated_at         timestamptz not null default now()
         );
@@ -42,6 +43,12 @@ public sealed class PlayerSchema(
             on players (lower(name)) where name <> '';
 
         create sequence if not exists player_ids as bigint start with {PlayerId.First};
+
+        -- Columns added after the table first existed. `create table if not
+        -- exists` does nothing to a table that is already there, so a column
+        -- introduced later has to say so on its own or it simply never appears
+        -- on anyone's database but a fresh one.
+        alter table players add column if not exists ship_card_guid bigint not null default 0;
         """;
 
     public async Task StartAsync(CancellationToken ct)

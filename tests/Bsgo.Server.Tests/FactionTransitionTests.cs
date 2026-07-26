@@ -93,11 +93,11 @@ public class FactionTransitionTests
     }
 
     [Fact]
-    public async Task Creating_the_character_does_not_send_to_the_room_while_there_are_no_ships()
+    public async Task Creating_the_character_grants_a_ship_but_stops_short_of_the_room()
     {
-        // The hangar window reaches for the player's active ship. With no ship
-        // it throws inside the client's Update, which retries every frame and
-        // instantiates the scenery once per attempt until it closes.
+        // The ship is what the room needs, so it is handed over as soon as the
+        // character is finished — but with room entry shut the player is left
+        // where they are rather than sent anywhere.
         await using var server = await TestServer.StartAsync(o => o.EnableRoomEntry = false);
         using var client = await server.ConnectAsync();
         await client.ReadAsync();
@@ -117,8 +117,18 @@ public class FactionTransitionTests
         avatar.Write(payload);
         await client.SendAsync(ProtocolId.Player, (ushort)PlayerRequest.CreateAvatar, payload);
 
-        // It replies with the avatar, but sends them to no room.
         await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.Avatar);
+
+        // The ship arrives...
+        var add = await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.AddShip);
+        var r = new BgoReader(add.Payload);
+        Assert.Equal(Hangar.ShipId, r.ReadUInt16());
+        Assert.NotEqual(0u, r.ReadUInt32());   // the card the client will fetch
+
+        await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.ActiveShip);
+        await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.Slots);
+
+        // ...and nothing else: no scene transition.
         await Task.Delay(200);
         Assert.Equal(0, client.Available);
     }

@@ -25,6 +25,7 @@
       "role": "Interceptor",
       "level": 20,
       "counterpart": "Advanced Fenrir",
+      "prefab": "humant3fighter",
       "slots": {
         "weapon": 8,
         "hull": 3,
@@ -61,6 +62,7 @@
       "role": "Carrier",
       "level": 40,
       "counterpart": "Advanced Surtur",
+      "prefab": "humant4carrier",
       "slots": {
         "weapon": 0,
         "hull": 4,
@@ -97,6 +99,7 @@
       "role": "Command",
       "level": 10,
       "counterpart": "Advanced Spectre",
+      "prefab": "humant2command",
       "slots": {
         "weapon": 6,
         "hull": 3,
@@ -133,6 +136,7 @@
       "role": "Multi-Role",
       "level": 20,
       "counterpart": "Advanced Nidhogg",
+      "prefab": "humant3merit",
       "slots": {
         "weapon": 9,
         "hull": 3,
@@ -169,6 +173,7 @@
       "role": "Multi-Role",
       "level": 10,
       "counterpart": "Advanced Liche",
+      "prefab": "",
       "slots": {
         "weapon": 7,
         "hull": 3,
@@ -205,6 +210,7 @@
       "role": "Assault",
       "level": 20,
       "counterpart": "Advanced Jormung",
+      "prefab": "humant3defender",
       "slots": {
         "weapon": 8,
         "hull": 5,
@@ -241,6 +247,7 @@
       "role": "Assault",
       "level": 10,
       "counterpart": "Advanced Wraith",
+      "prefab": "humant2defender",
       "slots": {
         "weapon": 6,
         "hull": 5,
@@ -277,6 +284,7 @@
       "role": "Command",
       "level": 1,
       "counterpart": "Advanced Heavy Raider",
+      "prefab": "humant1command",
       "slots": {
         "weapon": 4,
         "hull": 2,
@@ -313,6 +321,7 @@
       "role": "Force Recon",
       "level": 1,
       "counterpart": "Malefactor Type-2",
+      "prefab": "",
       "slots": {
         "weapon": 0,
         "hull": 2,
@@ -349,6 +358,7 @@
       "role": "Assault",
       "level": 1,
       "counterpart": "Advanced Marauder",
+      "prefab": "humant1defender",
       "slots": {
         "weapon": 5,
         "hull": 5,
@@ -385,6 +395,7 @@
       "role": "Interceptor",
       "level": 10,
       "counterpart": "Advanced Banshee",
+      "prefab": "humant2fighter",
       "slots": {
         "weapon": 6,
         "hull": 2,
@@ -421,6 +432,7 @@
       "role": "Command",
       "level": 20,
       "counterpart": "Advanced Hel",
+      "prefab": "",
       "slots": {
         "weapon": 8,
         "hull": 2,
@@ -457,6 +469,7 @@
       "role": "Interceptor",
       "level": 1,
       "counterpart": "Advanced Cylon Raider",
+      "prefab": "humant1fighter",
       "slots": {
         "weapon": 4,
         "hull": 2,
@@ -493,6 +506,7 @@
       "role": "Multi-Role",
       "level": 1,
       "counterpart": "Advanced War Raider Mark II",
+      "prefab": "",
       "slots": {
         "weapon": 4,
         "hull": 3,
@@ -529,6 +543,7 @@
       "role": "Multi-Role",
       "level": 1,
       "counterpart": "Advanced Cylon War Raider",
+      "prefab": "humant1merit",
       "slots": {
         "weapon": 5,
         "hull": 3,
@@ -565,6 +580,7 @@
       "role": "Interceptor",
       "level": 20,
       "counterpart": "Fenrir",
+      "prefab": "humant3fighter",
       "slots": {
         "weapon": 8,
         "hull": 2,
@@ -601,6 +617,7 @@
       "role": "Battlestar",
       "level": null,
       "counterpart": "Basestar",
+      "prefab": "humant4pegasus",
       "slots": {
         "weapon": 12,
         "hull": 0,
@@ -637,6 +654,7 @@
       "role": "Carrier",
       "level": 40,
       "counterpart": "Surtur",
+      "prefab": "humant4carrier",
       "slots": {
         "weapon": 0,
         "hull": 2,
@@ -673,6 +691,7 @@
       "role": "Command",
       "level": 10,
       "counterpart": "Spectre",
+      "prefab": "humant2command",
       "slots": {
         "weapon": 6,
         "hull": 2,
@@ -709,6 +728,7 @@
       "role": "Multi-Role",
       "level": 20,
       "counterpart": "Nidhogg",
+      "prefab": "humant3merit",
       "slots": {
         "weapon": 8,
         "hull": 3,
@@ -745,6 +765,7 @@
       "role": "Multi-Role",
       "level": 10,
       "counterpart": "Liche",
+      "prefab": "",
       "slots": {
         "weapon": 6,
         "hull": 3,
@@ -781,6 +802,7 @@
       "role": "Assault",
       "level": 20,
       "counterpart": "Jormung",
+      "prefab": "humant3defender",
       "slots": {
         "weapon": 6,
         "hull": 4,
@@ -817,6 +839,7 @@
       "role": "Assault",
       "level": 10,
       "counterpart": "Wraith",
+      "prefab": "humant2defender",
       "slots": {
         "weapon": 4,
         "hull": 4,
@@ -853,6 +876,7 @@
       "role": "Command",
       "level": 1,
       "counterpart": "Cylon Heavy Raider",
+      "prefab": "humant1command",
       "slots": {
         "weapon": 3,
         "hull": 2,
@@ -889,6 +913,7 @@
       "role": "Command",
       "level": 1,
       "counterpart": "Heavy Raider Fleet Recon(FR)",
+      "prefab": "",
       "slots": {
         "weapon": 3,
         "hull": 1,
@@ -925,6 +950,7 @@
       "role": "Force Recon",
       "level": 1,
       "counterpart": "Malefactor Type-1",
+      "prefab": "",
       "slots": {
         "weapon": 0,
         "hull": 2,
@@ -961,6 +987,7 @@
       "role": "Assault",
       "level": 1,
       "counterpart": "Marauder",
+      "prefab": "humant1defender",
       "slots": {
         "weapon": 4,
         "hull": 5,
@@ -997,6 +1024,7 @@
       "role": "Interceptor",
       "level": 10,
       "counterpart": "Banshee",
+      "prefab": "humant2fighter",
       "slots": {
         "weapon": 4,
         "hull": 2,
@@ -1033,6 +1061,7 @@
       "role": "Command",
       "level": 20,
       "counterpart": "Hel",
+      "prefab": "",
       "slots": {
         "weapon": 6,
         "hull": 2,
@@ -1069,6 +1098,7 @@
       "role": "Interceptor",
       "level": 1,
       "counterpart": "Cylon Raider",
+      "prefab": "humant1fighter",
       "slots": {
         "weapon": 3,
         "hull": 2,
@@ -1105,6 +1135,7 @@
       "role": "Multi-Role",
       "level": 1,
       "counterpart": "War Raider Mark II",
+      "prefab": "",
       "slots": {
         "weapon": 3,
         "hull": 3,
@@ -1141,6 +1172,7 @@
       "role": "Multi-Role",
       "level": 1,
       "counterpart": "Cylon War Raider",
+      "prefab": "humant1merit",
       "slots": {
         "weapon": 4,
         "hull": 3,
@@ -1177,6 +1209,7 @@
       "role": "Interceptor",
       "level": 10,
       "counterpart": "Advanced Scythe",
+      "prefab": "cylont2fighter",
       "slots": {
         "weapon": 6,
         "hull": 2,
@@ -1213,6 +1246,7 @@
       "role": "Interceptor",
       "level": 1,
       "counterpart": "Advanced Viper Mark II",
+      "prefab": "cylont1fighter",
       "slots": {
         "weapon": 4,
         "hull": 2,
@@ -1249,6 +1283,7 @@
       "role": "Multi-Role",
       "level": 1,
       "counterpart": "Advanced Viper Mark VII",
+      "prefab": "cylont1merit",
       "slots": {
         "weapon": 5,
         "hull": 3,
@@ -1285,6 +1320,7 @@
       "role": "Interceptor",
       "level": 20,
       "counterpart": "Advanced Aesir",
+      "prefab": "cylont3fighter",
       "slots": {
         "weapon": 8,
         "hull": 3,
@@ -1321,6 +1357,7 @@
       "role": "Command",
       "level": 1,
       "counterpart": "Advanced Raptor",
+      "prefab": "",
       "slots": {
         "weapon": 4,
         "hull": 2,
@@ -1357,6 +1394,7 @@
       "role": "Command",
       "level": 20,
       "counterpart": "Advanced Vanir",
+      "prefab": "cylont3command",
       "slots": {
         "weapon": 8,
         "hull": 2,
@@ -1393,6 +1431,7 @@
       "role": "Assault",
       "level": 20,
       "counterpart": "Advanced Jotunn",
+      "prefab": "cylont3defender",
       "slots": {
         "weapon": 8,
         "hull": 5,
@@ -1429,6 +1468,7 @@
       "role": "Multi-Role",
       "level": 10,
       "counterpart": "Advanced Halberd",
+      "prefab": "cylont2merit",
       "slots": {
         "weapon": 7,
         "hull": 3,
@@ -1465,6 +1505,7 @@
       "role": "Assault",
       "level": 1,
       "counterpart": "Advanced Rhino",
+      "prefab": "cylont1defender",
       "slots": {
         "weapon": 5,
         "hull": 5,
@@ -1501,6 +1542,7 @@
       "role": "Multi-Role",
       "level": 20,
       "counterpart": "Advanced Gungnir",
+      "prefab": "cylont3merit",
       "slots": {
         "weapon": 9,
         "hull": 3,
@@ -1537,6 +1579,7 @@
       "role": "Command",
       "level": 10,
       "counterpart": "Advanced Glaive",
+      "prefab": "cylont2command",
       "slots": {
         "weapon": 6,
         "hull": 3,
@@ -1573,6 +1616,7 @@
       "role": "Carrier",
       "level": 40,
       "counterpart": "Advanced Brimir",
+      "prefab": "cylont4carrier",
       "slots": {
         "weapon": 0,
         "hull": 4,
@@ -1609,6 +1653,7 @@
       "role": "Multi-Role",
       "level": 1,
       "counterpart": "Advanced Viper Mark III",
+      "prefab": "",
       "slots": {
         "weapon": 4,
         "hull": 3,
@@ -1645,6 +1690,7 @@
       "role": "Assault",
       "level": 10,
       "counterpart": "Advanced Maul",
+      "prefab": "cylont2defender",
       "slots": {
         "weapon": 6,
         "hull": 5,
@@ -1681,6 +1727,7 @@
       "role": "Interceptor",
       "level": 10,
       "counterpart": "Scythe",
+      "prefab": "cylont2fighter",
       "slots": {
         "weapon": 4,
         "hull": 2,
@@ -1717,6 +1764,7 @@
       "role": "Basestar",
       "level": null,
       "counterpart": "Battlestar Pegasus",
+      "prefab": "basestar",
       "slots": {
         "weapon": 12,
         "hull": 0,
@@ -1753,6 +1801,7 @@
       "role": "Command",
       "level": 1,
       "counterpart": "Raptor",
+      "prefab": "cylont1command",
       "slots": {
         "weapon": 3,
         "hull": 2,
@@ -1789,6 +1838,7 @@
       "role": "Interceptor",
       "level": 1,
       "counterpart": "Viper Mark II",
+      "prefab": "cylont1fighter",
       "slots": {
         "weapon": 3,
         "hull": 2,
@@ -1825,6 +1875,7 @@
       "role": "Multi-Role",
       "level": 1,
       "counterpart": "Viper Mark VII",
+      "prefab": "cylont1merit",
       "slots": {
         "weapon": 4,
         "hull": 3,
@@ -1861,6 +1912,7 @@
       "role": "Interceptor",
       "level": 20,
       "counterpart": "Aesir",
+      "prefab": "cylont3fighter",
       "slots": {
         "weapon": 8,
         "hull": 2,
@@ -1897,6 +1949,7 @@
       "role": "Command",
       "level": 1,
       "counterpart": "Raptor Fleet Recon(FR)",
+      "prefab": "",
       "slots": {
         "weapon": 3,
         "hull": 1,
@@ -1933,6 +1986,7 @@
       "role": "Command",
       "level": 20,
       "counterpart": "Vanir",
+      "prefab": "cylont3command",
       "slots": {
         "weapon": 6,
         "hull": 2,
@@ -1969,6 +2023,7 @@
       "role": "Assault",
       "level": 20,
       "counterpart": "Jotunn",
+      "prefab": "cylont3defender",
       "slots": {
         "weapon": 6,
         "hull": 4,
@@ -2005,6 +2060,7 @@
       "role": "Multi-Role",
       "level": 10,
       "counterpart": "Halberd",
+      "prefab": "cylont2merit",
       "slots": {
         "weapon": 6,
         "hull": 3,
@@ -2041,6 +2097,7 @@
       "role": "Force Recon",
       "level": 1,
       "counterpart": "Raven Mark VI-R",
+      "prefab": "",
       "slots": {
         "weapon": 0,
         "hull": 2,
@@ -2077,6 +2134,7 @@
       "role": "Force Recon",
       "level": 1,
       "counterpart": "Advanced Raven Mark VI-R/A",
+      "prefab": "",
       "slots": {
         "weapon": 0,
         "hull": 2,
@@ -2113,6 +2171,7 @@
       "role": "Assault",
       "level": 1,
       "counterpart": "Rhino",
+      "prefab": "cylont1defender",
       "slots": {
         "weapon": 4,
         "hull": 5,
@@ -2149,6 +2208,7 @@
       "role": "Multi-Role",
       "level": 20,
       "counterpart": "Gungnir",
+      "prefab": "cylont3merit",
       "slots": {
         "weapon": 8,
         "hull": 3,
@@ -2185,6 +2245,7 @@
       "role": "Command",
       "level": 10,
       "counterpart": "Glaive",
+      "prefab": "cylont2command",
       "slots": {
         "weapon": 6,
         "hull": 2,
@@ -2221,6 +2282,7 @@
       "role": "Carrier",
       "level": 40,
       "counterpart": "Brimir",
+      "prefab": "cylont4carrier",
       "slots": {
         "weapon": 0,
         "hull": 2,
@@ -2257,6 +2319,7 @@
       "role": "Multi-Role",
       "level": 1,
       "counterpart": "Viper Mark III",
+      "prefab": "",
       "slots": {
         "weapon": 3,
         "hull": 3,
@@ -2293,6 +2356,7 @@
       "role": "Assault",
       "level": 10,
       "counterpart": "Maul",
+      "prefab": "cylont2defender",
       "slots": {
         "weapon": 4,
         "hull": 4,

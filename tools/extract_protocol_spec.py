@@ -46,6 +46,8 @@ SHARED_ENUMS = {
     "LoginError": "byte",        # LoginProtocol: (LoginError)br.ReadByte()
     "ConnectType": "byte",       # LoginProtocol: written as w.Write((byte)...)
     "AvatarItem": "byte",        # AvatarItems: items[(AvatarItem)r.ReadByte()]
+    "ObjectStat": "ushort",      # ObjectStats: (ObjectStat)r.ReadUInt16()
+    "ShipSlotType": "byte",      # ShipSlotCard: (ShipSlotType)r.ReadByte()
 }
 
 

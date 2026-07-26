@@ -63,6 +63,16 @@ public sealed class PlayerRecord
     /// <summary>Key bindings, also opaque.</summary>
     public byte[] KeyBindings { get; set; } = [];
 
+    /// <summary>
+    /// Card identifier of the ship the player flies, or 0 for none.
+    /// </summary>
+    /// <remarks>
+    /// One ship, not a hangar full of them: the client models a hangar with an
+    /// active ship, and until there is a reason for a second one, the record
+    /// that would hold the list is a list of one.
+    /// </remarks>
+    public uint ShipCardGuid { get; set; }
+
     /// <summary>A character without faction or name has not been created yet.</summary>
     public bool IsCreated => Faction != Faction.Neutral && Name.Length > 0;
 }

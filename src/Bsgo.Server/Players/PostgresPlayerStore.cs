@@ -29,7 +29,7 @@ public sealed class PostgresPlayerStore(
     /// just quietly land in the wrong properties. <see cref="Read"/> looks them
     /// up by name for the same reason.
     /// </remarks>
-    private const string Columns = "id, name, faction, avatar_description, settings, key_bindings";
+    private const string Columns = "id, name, faction, avatar_description, settings, key_bindings, ship_card_guid";
 
     /// <summary>How many times a momentary database failure is retried.</summary>
     /// <remarks>
@@ -165,13 +165,14 @@ public sealed class PostgresPlayerStore(
     {
         const string sql = $"""
             insert into players ({Columns})
-            values ($1, $2, $3, $4, $5, $6)
+            values ($1, $2, $3, $4, $5, $6, $7)
             on conflict (id) do update set
                 name               = excluded.name,
                 faction            = excluded.faction,
                 avatar_description = excluded.avatar_description,
                 settings           = excluded.settings,
                 key_bindings       = excluded.key_bindings,
+                ship_card_guid     = excluded.ship_card_guid,
                 updated_at         = now()
             """;
 
@@ -184,6 +185,7 @@ public sealed class PostgresPlayerStore(
             command.Parameters.AddWithValue(player.AvatarDescription);
             command.Parameters.AddWithValue(player.Settings);
             command.Parameters.AddWithValue(player.KeyBindings);
+            command.Parameters.AddWithValue((long)player.ShipCardGuid);
 
             await command.ExecuteNonQueryAsync(token);
         }, ct);
@@ -197,5 +199,6 @@ public sealed class PostgresPlayerStore(
         AvatarDescription = reader.GetFieldValue<byte[]>(reader.GetOrdinal("avatar_description")),
         Settings = reader.GetFieldValue<byte[]>(reader.GetOrdinal("settings")),
         KeyBindings = reader.GetFieldValue<byte[]>(reader.GetOrdinal("key_bindings")),
+        ShipCardGuid = (uint)reader.GetInt64(reader.GetOrdinal("ship_card_guid")),
     };
 }

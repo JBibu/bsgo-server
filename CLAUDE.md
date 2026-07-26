@@ -39,7 +39,10 @@ exception — `bsgo_Data/output_log.txt` inside the Wine prefix.
   `KeyNotFoundException` inside the client.
 - **Payload field order is the whole contract.** There are no tags: one field
   too many or too few shifts everything after it.
-- **Do not enable `ServerOptions.EnableRoomEntry` until players have a ship.**
+- **`ServerOptions.EnableRoomEntry` is still off, and turning it on has not been
+  tried against the client.** Players now get a ship, which is what the hangar
+  window was missing, but nothing has confirmed the ship cards are read the way
+  the client expects. Flip it, run the client, read its log.
 
 ## Layout
 
@@ -79,3 +82,7 @@ not in it: that table is `SHARED_ENUMS` in the extractor.
 Hand-edited. `ShipTableTests` enforces its rules — run the tests after changing
 a value. It only carries stats the client has in `ObjectStat`; anything else is
 noise the server can never send.
+
+`prefab` is empty on 15 ships whose model could not be named from the client's
+bundles. A wrong name there draws nothing and reports nothing, so it is left
+blank rather than guessed.

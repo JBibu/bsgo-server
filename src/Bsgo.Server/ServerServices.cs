@@ -50,13 +50,19 @@ public static class ServerServices
         // Static game data, generated from the client's assets.
         services.AddSingleton(_ => AvatarCatalogue.LoadFrom(DataFile("avatar-catalogue.json")));
         services.AddSingleton(_ => RoomCatalogue.LoadFrom(DataFile("rooms.json")));
+        services.AddSingleton(_ => ShipCatalogue.LoadFrom(DataFile("ships.json")));
 
         // Card sources. A new kind of card is a provider registered here, with
         // no changes to the catalogue handler.
         services.AddSingleton<ICardProvider, AvatarCardProvider>();
         services.AddSingleton<ICardProvider, RoomCardProvider>();
+        services.AddSingleton<ICardProvider, ShipCardProvider>();
 
         services.AddSingleton<SceneDirector>();
+
+        // The hangar both owns the player's ship and pushes it on entry.
+        services.AddSingleton<Hangar>();
+        services.AddSingleton<IPlayerEnteredHook>(sp => sp.GetRequiredService<Hangar>());
 
         services.AddProtocolHandler<LoginProtocolHandler>();
         services.AddProtocolHandler<SyncProtocolHandler>();

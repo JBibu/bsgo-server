@@ -12,10 +12,18 @@ namespace Bsgo.Server.Protocols;
 /// </summary>
 public sealed class PlayerProtocolHandler(
     IPlayerStore store,
+    Hangar hangar,
     SceneDirector scenes,
     ILogger<PlayerProtocolHandler> logger) : IProtocolHandler, IPlayerEnteredHook
 {
     public ProtocolId Protocol => ProtocolId.Player;
+
+    /// <summary>
+    /// Straight after the catalogue, and before anything describing what the
+    /// player owns: the client reads those as belonging to whoever it thinks it
+    /// is, so it should be told that first.
+    /// </summary>
+    public int Order => 10;
 
     /// <summary>
     /// Sends the player their identifier on entry, so the client keeps it and
@@ -112,7 +120,12 @@ public sealed class PlayerProtocolHandler(
 
         await SendAvatarAsync(connection, avatar, ct);
 
-        // The character is finished, so this is where they walk into the game.
+        // The character is finished: it gets its ship before being sent
+        // anywhere, because the room is what needs one.
+        if (await hangar.EnsureShipAsync(player, ct) is not null)
+            await hangar.SendAsync(connection, player, ct);
+
+        // And this is where they walk into the game.
         // If they cannot yet, they stay on the creation screen they are already
         // looking at — which is a scene, so nothing hangs.
         await scenes.TrySendIntoTheGameAsync(connection, player, ct);

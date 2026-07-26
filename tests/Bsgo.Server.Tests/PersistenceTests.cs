@@ -74,6 +74,53 @@ public class PersistenceTests
     }
 
     [Fact]
+    public async Task The_ship_survives_a_restart()
+    {
+        await using var database = await TestDatabase.CreateAsync();
+
+        uint playerId, shipCard;
+
+        await using (var server = await TestServer.StartAsync(connectionString: database.ConnectionString))
+        {
+            using var client = await server.ConnectAsync();
+            playerId = await client.LogInAsync();
+
+            var faction = new BgoWriter(1);
+            faction.Write((byte)Faction.Colonial);
+            await client.SendAsync(ProtocolId.Player, (ushort)PlayerRequest.SelectFaction, faction);
+            await client.ReadUntilAsync(ProtocolId.Scene, (ushort)SceneReply.LoadNextScene);
+
+            await client.SendAsync(ProtocolId.Player, (ushort)PlayerRequest.ChooseName, Text("Starbuck"));
+            await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.Name);
+
+            var payload = new BgoWriter();
+            new AvatarDescription().Write(payload);
+            await client.SendAsync(ProtocolId.Player, (ushort)PlayerRequest.CreateAvatar, payload);
+
+            var add = await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.AddShip);
+            var r = new BgoReader(add.Payload);
+            r.ReadUInt16();
+            shipCard = r.ReadUInt32();
+        }
+
+        // A second server: the ship is announced again without being granted
+        // again, and it is the same one.
+        await using (var server = await TestServer.StartAsync(connectionString: database.ConnectionString))
+        {
+            var store = server.Services.GetRequiredService<IPlayerStore>();
+            Assert.Equal(shipCard, (await store.GetOrCreateAsync(playerId)).ShipCardGuid);
+
+            using var client = await server.ConnectAsync();
+            await client.LogInAsync(playerId);
+
+            var add = await client.ReadUntilAsync(ProtocolId.Player, (ushort)PlayerReply.AddShip);
+            var r = new BgoReader(add.Payload);
+            r.ReadUInt16();
+            Assert.Equal(shipCard, r.ReadUInt32());
+        }
+    }
+
+    [Fact]
     public async Task A_name_stays_taken_after_a_restart()
     {
         await using var database = await TestDatabase.CreateAsync();
